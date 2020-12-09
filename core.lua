@@ -350,8 +350,16 @@ function tprint (tbl, indent)
   return toprint
 end
 
+function tsize(t)
+	if t == nil then return nil end
+	if not type(elem) == "table" then return nil end
+	s = 0
+	for _,_ in pairs(t) do s = s + 1 end
+	return s
+end
+
 function tempty(t)
-	if t == nil then return true end
-	if tablesize(t) > 0 then return false end
-	return true
+	s = tsize(t)
+	if s == nil then return true end
+	return (s == 0)
 end
