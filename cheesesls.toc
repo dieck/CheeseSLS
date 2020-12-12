@@ -17,6 +17,7 @@ locale-enUS.lua
 output-deDE.lua
 locale-deDE.lua
 
+gui.lua
 bids.lua
 core.lua
 

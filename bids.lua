@@ -95,6 +95,10 @@ function CheeseSLS:StartBidding(itemLink)
 		return nil
 	end
 	
+	-- ensure cached GetItemInfo for gui later
+	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemLink)	
+	GetItemInfo(itemId)
+	
 	startnotice = L["Start Bidding now: itemLink"](itemLink)
 	
 	if UnitInRaid("player") then
@@ -127,6 +131,28 @@ function CheeseSLS:StartBidding(itemLink)
 	
 	CheeseSLS.biddingTimer = CheeseSLS:ScheduleRepeatingTimer("BidTimerHandler", 1)
 	
+end
+
+function CheeseSLS:GetRaiderList(bids)
+	local names = {}
+
+	if GetNumGroupMembers() == 0 then 
+		names[UnitName("player")] = UnitName("player")
+		return names 
+	end
+
+	for i = 1, GetNumGroupMembers() do
+		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
+		
+		if bids[name] == nil then
+			names[name] = name
+		else
+			names[name] = name .. " (" .. bids[name] .. ")"
+		end
+		
+	end
+
+	return name
 end
 
 function CheeseSLS:BidTimerHandler()
@@ -165,7 +191,8 @@ function CheeseSLS:BidTimerHandler()
 				CheeseSLS:OutputWithWarning(L["Congratulations! maxplayers won itemLink for maxbid"](maxplayers,CheeseSLS.db.profile.currentbidding.itemLink,bidtext))
 				for _,name in pairs(maxplayers) do
 					-- is only one, but using pairs iterator seems the simpliest approach
-					local f = CheeseSLS:createRequestDialogFrame(name, -newmaxrounded, CheeseSLS.db.profile.currentbidding.itemLink)
+					local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
+					local f = CheeseSLS:createRequestDialogFrame(name, -newmaxrounded, CheeseSLS.db.profile.currentbidding.itemLink, raiders)
 					f:Show()
 				end
 			else
@@ -239,7 +266,8 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 		bidrounded = math.floor(bidorig)
 		bidtext = bidrounded
 		if bidrounded ~= bidorig then bidtext = bidrounded .. " (" .. bidorig .. ")" end
-		local f = CheeseSLS:createRequestDialogFrame(rtcmatch, -bidrounded, CheeseSLS.db.profile.lastbidding.itemLink)
+		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.lastbidding.bids)
+		local f = CheeseSLS:createRequestDialogFrame(rtcmatch, -bidrounded, CheeseSLS.db.profile.lastbidding.itemLink, raiders)
 	end
 
 
@@ -342,46 +370,4 @@ function CheeseSLS:CHAT_MSG_SYSTEM (event, text )
 			SendChatMessage(L["We are bidding, not rolling. Please state your bid where"](CheeseSLS:GetRulesWhere()), "WHISPER", nil, sender)
 		end
 	end
-end
-
-function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink)
-	local AceGUI = LibStub("AceGUI-3.0")
-
-	local f = AceGUI:Create("Window")
-	f:SetTitle("DKP " .. user)
-	f:SetStatusText("")
-	f:SetLayout("Flow")
-	f:SetWidth(400)
-	f:SetHeight(100)
-	f:SetCallback("OnClose",function(widget) AceGUI:Release(widget) end)
-	
-	local txt = AceGUI:Create("Label")
-	txt:SetText("Charge " .. dkp .. " to " .. user .. " for " .. itemlink .. "?")
-	txt:SetRelativeWidth(1)
-	f:AddChild(txt)
-
-
-	local button1 = AceGUI:Create("Button")
-	button1.slsdata = { user=user, dkp=dkp, itemlink=itemlink }
-	button1.slsframe = f
-	button1:SetText("Yes")
-	button1:SetRelativeWidth(0.5)
-	button1:SetCallback("OnClick", function(widget)
-		GoogleSheetDKP:Item(widget.slsdata.user, widget.slsdata.dkp, widget.slsdata.itemlink)
-		widget.slsframe:Hide()
-	end)
-	f:AddChild(button1)
-
-	local button2 = AceGUI:Create("Button")
-	button2.slsdata = { user=user, dkp=dkp, itemlink=itemlink }
-	button2.slsframe = f
-	button2:SetText("No")
-	button2:SetRelativeWidth(0.5)
-	button2:SetCallback("OnClick", function(widget)
-		CheeseSLS:Print("Will NOT book " .. widget.slsdata.dkp .. "DKP to " .. widget.slsdata.user .. " for " .. widget.slsdata.itemlink .. ", so take care of that yourself, e.g. by /gsdkp item")
-		widget.slsframe:Hide()
-	end)
-	f:AddChild(button2)
-
-	return f
 end
