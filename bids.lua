@@ -143,16 +143,19 @@ function CheeseSLS:GetRaiderList(bids)
 
 	for i = 1, GetNumGroupMembers() do
 		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
-		
-		if bids[name] == nil then
-			names[name] = name
-		else
-			names[name] = name .. " (" .. bids[name] .. ")"
+	
+		local dkp = GoogleSheetDKP:GetDKP(name)
+		if dkp == nil then dkp = 0 end
+
+		names[name] = name .. " (" .. dkp .. " DKP)"
+					
+		if bids[name] ~= nil then
+			names[name] = names[name] .. " [Bid: " .. bids[name] .. "]"
 		end
 		
 	end
 
-	return name
+	return names
 end
 
 function CheeseSLS:BidTimerHandler()

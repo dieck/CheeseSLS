@@ -44,7 +44,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	edDKP.guiid = guiid
 	edDKP:SetText(-dkp)
 	edDKP:SetLabel("DKP charge")
-	edDKP:SetRelativeWidth(0.5)
+	edDKP:SetRelativeWidth(0.3)
 	edDKP:SetCallback("OnEnterPressed", function(widget)
 		local newdkp = widget:GetText()
 
@@ -67,6 +67,22 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 		widget:ClearFocus()
 	end)
 	f:AddChild(edDKP)
+	
+	local buttonHalf = AceGUI:Create("Button")
+	buttonHalf.guiid = guiid
+	buttonHalf.edDKP = edDKP
+	buttonHalf.slsframe = f
+	buttonHalf:SetText("1/2")
+	buttonHalf:SetRelativeWidth(0.2)
+	buttonHalf:SetCallback("OnClick", function(widget)
+		local slsdata = CheeseSLS.slsdatastore[widget.guiid]
+		local curDKP = GoogleSheetDKP:GetDKP(slsdata.user)
+		if curDKP == nil then curDKP = 0 end
+		local halfDKP = math.floor(curDKP / 2)
+		widget.edDKP:SetText(halfDKP)
+		slsdata.dkp = halfDKP
+	end)
+	f:AddChild(buttonHalf)
 		
 	local ddChar = AceGUI:Create("Dropdown")
 	ddChar.guiid = guiid
