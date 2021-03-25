@@ -159,7 +159,7 @@ CheeseSLS.optionsTable = {
       set = function(info,val)
 		CheeseSLS.db.profile.handle_bid = val 
 		if CheeseSLS.db.profile.handle_bid then
-			CheeseSLS:RegisterChatCommand('bid', 'ChatCommandDMB');
+			CheeseSLS:RegisterChatCommand('bid', 'ChatCommand');
 		else
 			CheeseSLS:UnregisterChatCommand('bid');
 		end
@@ -177,7 +177,7 @@ CheeseSLS.optionsTable = {
       set = function(info,val)
 		CheeseSLS.db.profile.handle_sls = val 
 		if CheeseSLS.db.profile.handle_sls then
-			CheeseSLS:RegisterChatCommand('sls', 'ChatCommandDMB');
+			CheeseSLS:RegisterChatCommand('sls', 'ChatCommand');
 		else
 			CheeseSLS:UnregisterChatCommand('sls');
 		end
@@ -278,33 +278,76 @@ function CheeseSLS:OnDisable()
     -- Called when the addon is disabled
 end
 
+function strlt(s)
+	return strlower(strtrim(s))
+end
 
 function CheeseSLS:ChatCommand(inc)
 
-	if strtrim(inc) == "" then
+	if strlt(inc) == "" then
 		CheeseSLS:Print(L["Usage: |cFF00CCFF/csls |cFFA335EE[Sword of a Thousand Truths]|r to start a bid"])
 		CheeseSLS:Print(L["Usage: |cFF00CCFF/csls config|r to open the configuration window"])
 		return nil
 	end
 
-	if strlower(inc) == "config" then
+	if strlt(inc) == "config" then
 		LibStub("AceConfigDialog-3.0"):Open("CheeseSLS")
 		return nil
 	end
 
-	if strlower(inc) == "rules" then
+	if strlt(inc) == "rules" then
 		CheeseSLS:OutputRules()
 		return nil
 	end
 
-	if strlower(inc) == "current" or strlower(inc) == "bids" or strlower(inc) == "list" then
+	if strlt(inc) == "current" or strlt(inc) == "bids" or strlt(inc) == "list" then
 		CheeseSLS:OutputFullList(CheeseSLS.db.profile.currentbidding.bids)
 		return nil
 	end
 
-	if strlower(inc) == "last" then
+	if strlt(inc) == "second" or strlt(inc) == "again" then
+		CheeseSLS:SecondBidder()
+		return nil
+	end
+
+	if strlt(inc) == "last" then
 		CheeseSLS:OutputFullList(CheeseSLS.db.profile.lastbidding.bids)
 		return nil
+	end
+
+	-- forward to GoogleSheetDKP
+	-- needs to be done before itemLink check below, because gsdkp command "item User -DKP itemlink" would trigger on split below
+	local gsret = GoogleSheetDKP:ChatCommand(inc)
+	if gsret then return true end
+
+	-- look if we do manual assignment
+	-- e.g. "/csls + playername [Sword of a Thousand Truths]" 
+	-- or "/csls f playername [Sword of a Thousand Truths]" 
+	local cmd,user,item = strsplit(" ", inc, 3)
+
+	if strlt(cmd) == "+" then
+		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(user))
+		if currentDKP == nil then currentDKP = 0 end
+		local halfDKP = math.floor(currentDKP/2)
+		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
+		local f = CheeseSLS:createRequestDialogFrame(name, -halfDKP, item, raiders)
+		f:Show()
+		return true
+	end
+	
+	if strlt(cmd) == "f" then
+		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(user))
+		if currentDKP == nil then currentDKP = 0 end
+		bidfix = tonumber(CheeseSLS.db.profile.fixcosts)
+		if currentDKP < bidfix then 
+			bidfix = currentDKP
+			local msg = user .. " does not have enough DKP for Fix Bid. I will bid all remaining DKP."
+			CheeseSLS:Print(msg)
+		end
+		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
+		local f = CheeseSLS:createRequestDialogFrame(name, -bidfix, item, raiders)
+		f:Show()
+		return true
 	end
 
 	-- if inc is itemLink: start bidding

@@ -158,6 +158,59 @@ function CheeseSLS:GetRaiderList(bids)
 	return names
 end
 
+local function tcopy(src) 
+	local dest = {}
+	for idx, val in pairs(src) do
+		if type(val) == "table" then
+			dest[idx] = tcopy(val)
+		else
+			dest[idx] = val
+		end
+	end
+	return dest
+end
+
+function CheeseSLS:SecondBidder()
+	if not (CheeseSLS.db.profile.currentbidding.itemLink == nil) then
+		CheeseSLS:Print(L["Bidding for itemLink still running, cannot start new bidding now!"](CheeseSLS.db.profile.currentbidding.itemLink))
+		return nil
+	end
+	
+	if CheeseSLS.db.profile.lastbidding == nil or CheeseSLS.db.profile.lastbidding.itemLink == nil then
+		CheeseSLS:Print("No last recorded bidding, cannot get second bidder")
+		return nil
+	end
+	
+	itemLink = CheeseSLS.db.profile.lastbidding.itemLink
+
+	if itemLink == nil then
+		GoogleSheetDKP:Debug("No Itemlink given for requesting last item")
+		return nil 
+	end
+	
+	local id = itemLink:match("|Hitem:(%d+):")
+	if id then
+
+		local lasthistory =  GoogleSheetDKP:FindLastItem(itemLink)
+		
+		if tempty(lasthistory) then
+			GoogleSheetDKP:Debug("Cannot find last history entry for " .. itemLink)
+			return nil
+		end
+
+		-- copy table (do not link by pointer only)
+		CheeseSLS.db.profile.currentbidding = tcopy(CheeseSLS.db.profile.lastbidding)
+	
+		-- remove user who got last loot from bidding
+		CheeseSLS.db.profile.currentbidding.bids[lasthistory.name] = nil
+
+		-- no need for a bid timer, that already happened. So just work with the data
+		CheeseSLS:BidTimerHandler()
+		
+	end
+
+end
+
 function CheeseSLS:BidTimerHandler()
 	
 	-- look if timer expired
