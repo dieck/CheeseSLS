@@ -1,8 +1,8 @@
-## Interface: 11307
+## Interface: 20501
 ## Title: CheeseSLS
 ## Notes: Addon to implement Shroud Loot System for GoogleSheetDKP
 ## Author: dieck
-## Version: 20210421
+## Version: 20210521
 ## Dependencies: GoogleSheetDKP
 ## SavedVariables: CheeseSLSDB
 
