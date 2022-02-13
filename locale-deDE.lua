@@ -12,15 +12,20 @@ L["Bids prolong"] = "Verlängern"
 L["If a new bid came in, prolong time to end if necessary"] = "Zeit um welche die Gebotsphase verlängert wird, wenn Gebote eingehen"
 
 L["Accept bids"] = "Akzeptierte Gebote"
+L["Accept rolls"] = "Akzeptiere Würfeln"
 
 L["Raid"] = "Raid"
 L["Accept bidding in party/raidchat"] = "Akzeptiere Gebote im Raid-/Gruppenchat"
 L["Whisper"] = "Geflüstert"
 L["Accept bidding by whisper"] = "Akzeptiere geflüsterte Gebote"
+L["Rolls"] = "Würfeln"
+L["Accept bidding by rolls"] = "Akzeptiere Würfeln als Gebot"
 L["Same amount"] = "Gleiches Gebot"
 L["Accept same amount bids (if disabled: earliest bid wins)"] = "Akzeptiert gleiche Gebote (sonst: früheres Gebot gewinnt)"
 L["Revoke bid"] = "Rücknahme"
 L["Allows users to revoke bid"] = "Erlaubt die Rücknahme von Geboten"
+L["Change bid"] = "Gebot ändern"
+L["Allows users to change bid"] = "Erlaubt das Ändern von Geboten (z.B. + zu f)"
 
 L["Raid announces"] = "Ausgaben an den Raid"
 

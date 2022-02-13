@@ -74,17 +74,27 @@ function CheeseSLS:OutputFullList(lst)
 		return nil
 	end
 
-
-	-- transpose table
+	-- transpose table, split to bids and rolls
 	bidsbybids = {}
+	bidsbyrolls = {}
+
 	for player,bid in pairs(lst) do
-		if bidsbybids[bid] == nil then bidsbybids[bid] = {} end
-		table.insert(bidsbybids[bid], player)
+		if bid < 0 then
+			if bidsbyrolls[-bid] == nil then bidsbyrolls[-bid] = {} end
+			table.insert(bidsbyrolls[-bid], player)
+		else
+			if bidsbybids[bid] == nil then bidsbybids[bid] = {} end
+			table.insert(bidsbybids[bid], player)
+		end
 	end
 
 	for bid,users in pairsByKeys(bidsbybids) do
 		players = table.concat(users, ", ")
 		o(L["Bid bid from players"](bid, players))
+	end
+	for bid,users in pairsByKeys(bidsbyrolls) do
+		players = table.concat(users, ", ")
+		o(L["Roll roll from players"](bid, players))
 	end
 end
 
@@ -100,6 +110,11 @@ function CheeseSLS:StartBidding(itemLink)
 	GetItemInfo(itemId)
 	
 	startnotice = L["Start Bidding now: itemLink"](itemLink)
+	
+	-- turn on Need and Greed modus of RTC, needed for output validation to book on rolls
+	RollTrackerClassic_Addon.DB.NeedAndGreed = true
+	-- clear old roll from before the bidding
+	RollTrackerClassic_Addon.ClearRolls()
 	
 	if UnitInRaid("player") then
 	
@@ -226,7 +241,11 @@ function CheeseSLS:BidTimerHandler()
 			-- find highest bidder(s)
 			local maxbid = -1
 			local maxplayers = {}
-			
+
+			-- negative bids: rolls
+			local minbid = 0
+			local minplayers = {}
+
 			for name,bid in pairs(bids) do 
 				if bid > maxbid then 
 					maxplayers = {}
@@ -235,13 +254,20 @@ function CheeseSLS:BidTimerHandler()
 				if bid == maxbid then
 					tinsert(maxplayers, name)
 				end
+
+				if bid < minbid then 
+					minplayers = {}
+					minbid = bid
+				end
+				if bid == minbid then
+					tinsert(minplayers, name)
+				end
 			end
 
 			-- show rounding to players (in case of arguments)
 			newmaxrounded = math.floor(maxbid)
 			bidtext = newmaxrounded
 			if newmaxrounded ~= maxbid then bidtext = newmaxrounded .. " (" .. maxbid .. ")" end
-
 
 			if #maxplayers == 1 then
 				CheeseSLS:OutputWithWarning(L["Congratulations! maxplayers won itemLink for maxbid"](maxplayers,CheeseSLS.db.profile.currentbidding.itemLink,bidtext))
@@ -251,10 +277,34 @@ function CheeseSLS:BidTimerHandler()
 					local f = CheeseSLS:createRequestDialogFrame(name, -newmaxrounded, CheeseSLS.db.profile.currentbidding.itemLink, raiders)
 					f:Show()
 				end
-			else
-
+			elseif #maxplayers > 1 then
 				CheeseSLS:OutputWithWarning(L["Tie! maxplayers please roll on itemLink for maxbid"](maxplayers,CheeseSLS.db.profile.currentbidding.itemLink,bidtext))
-				CheeseSLS:Print("TODO: I don't handle roll results yet. Use /gsdkp item NAME -" .. newmaxrounded .. " ITEMLINK!")
+--				CheeseSLS:Print("TODO: I don't handle roll results yet. Use /gsdkp item NAME -" .. newmaxrounded .. " ITEMLINK!")
+
+				-- turn on Need and Greed modus of RTC, needed for output validation to book on rolls
+				RollTrackerClassic_Addon.DB.NeedAndGreed = true
+				-- clear old roll from before so you only get current rolls for Tie
+				RollTrackerClassic_Addon.ClearRolls()
+
+			elseif #minplayers == 1 then
+				CheeseSLS:OutputWithWarning(L["Congratulations! maxplayers won itemLink for maxbid"](minplayers,CheeseSLS.db.profile.currentbidding.itemLink,L["Rolls"]))
+				for _,name in pairs(minplayers) do
+					-- is only one, but using pairs iterator seems the simpliest approach
+					local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
+					-- requesting storing 0 DKP bid
+					local f = CheeseSLS:createRequestDialogFrame(name, 0, CheeseSLS.db.profile.currentbidding.itemLink, raiders)
+					f:Show()
+				end
+
+			else -- #minplayers > 1
+				CheeseSLS:OutputWithWarning(L["Tie! maxplayers please roll on itemLink for maxbid"](minplayers,CheeseSLS.db.profile.currentbidding.itemLink,L["Rolls"]))
+--				CheeseSLS:Print("TODO: I don't handle roll results yet. Use /gsdkp item NAME -" .. newmaxrounded .. " ITEMLINK!")
+
+				-- turn on Need and Greed modus of RTC, needed for output validation to book on rolls
+				RollTrackerClassic_Addon.DB.NeedAndGreed = true
+				-- clear old roll from before so you only get current rolls for Tie
+				RollTrackerClassic_Addon.ClearRolls()
+
 			end
 			
 		end
@@ -349,6 +399,14 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 		-- not a bid, ignoring
 		return nil
 	end
+
+	-- check for accepting change
+	if (not CheeseSLS.db.profile.acceptchange) and (CheeseSLS.db.profile.currentbidding.bids[sender]) then
+		CheeseSLS:Debug(sender .. " tried to change bid")
+		-- if change is not accepted and bid already received, don't do anything
+		return nil;
+	end
+
 	
 	if CheeseSLS.db.profile.whisperreceived then
 		if bid == '+' then
@@ -415,15 +473,52 @@ function CheeseSLS:GetRulesWhere()
 	end	
 end
 
-function CheeseSLS:CHAT_MSG_SYSTEM (event, text )
-	if CheeseSLS.db.profile.whispernoroll then 
-		-- seems there is a problem with the german Umlaut
-		if GetLocale() == 'deDE' then RANDOM_ROLL_RESULT = "%s w\195\188rfelt. Ergebnis: %d (%d-%d)" end
-		local pattern = RANDOM_ROLL_RESULT:gsub( "%%s", "(.+)" ):gsub( "%%d %(%%d%-%%d%)", ".*" )
-		local sender = text:match(pattern)
+function CheeseSLS:CHAT_MSG_SYSTEM (event, text)
+
+	-- don't care for rolls if we are not in active bidding
+--		if CheeseSLS.db.profile.currentbidding.itemLink == nil then
+--			return nil
+--		end
+
+	-- seems there is a problem with the german Umlaut
+	if GetLocale() == 'deDE' then RANDOM_ROLL_RESULT = "%s w\195\188rfelt. Ergebnis: %d (%d-%d)" end
+
+	-- replace (, ), - by %(, %), %-
+	local pattern = string.gsub(RANDOM_ROLL_RESULT, "[%(%)-]", "%%%1")
+	-- enclose first %s in (), matching name
+	pattern = string.gsub(pattern, "%%s", "(.+)")
+	-- enclose first %d in (), matching roll result
+	pattern = string.gsub(pattern, "%%d", "%(%%d+%)")
+
+	local sender,roll,rollmin,rollmax = string.match(text,pattern)
+
+	if not sender then
+		-- not a roll, must be some other MSG_SYSTEM notification
+		return nil
+	end
+
+	if CheeseSLS.db.profile.acceptrolls then
+
+		-- not accepting rolls other then 1-100
+		if tonumber(rollmin) ~= 1   then return nil end
+		if tonumber(rollmax) ~= 100 then return nil end
+
+		if (not CheeseSLS.db.profile.acceptchange) and (((CheeseSLS.db.profile.currentbidding.bids)) and (CheeseSLS.db.profile.currentbidding.bids[sender])) then
+			-- if change is not accepted and bid already received, don't do anything
+			CheeseSLS:Debug(sender .. " tried to roll, but has already bid " .. CheeseSLS.db.profile.currentbidding.bids[sender])
+			return nil
+		end
+
+		-- only note bids if bids are running currently (would trigger on requested rolls for same bid otherwise)
+		if (CheeseSLS.db.profile.currentbidding.bids) then 
+			CheeseSLS.db.profile.currentbidding.bids[sender] = -roll
+		end
 		
-		if sender and not (CheeseSLS.db.profile.currentbidding.itemLink == nil) then
+	else
+		-- not accepting rolls
+		if CheeseSLS.db.profile.whispernoroll then 
 			SendChatMessage(L["We are bidding, not rolling. Please state your bid where"](CheeseSLS:GetRulesWhere()), "WHISPER", nil, sender)
 		end
 	end
+
 end

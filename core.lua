@@ -10,6 +10,7 @@ local defaults = {
 	acceptraid = true,
 	acceptwhisper = true,
 	acceptrevoke = true,
+	acceptrolls = false,
 	showcountdown = true,
 	whisperreceived = true,
 	whispernoroll = true,
@@ -92,6 +93,20 @@ CheeseSLS.optionsTable = {
 	},
 	newline221 = { name="", type="description", order=221 },
 
+	bidrolls = {
+		name = L["Rolls"],
+		desc = L["Accept bidding by rolls"],
+		type = "toggle",
+		order = 230,
+		set = function(info,val)
+			CheeseSLS.db.profile.acceptrolls = val
+			if CheeseSLS.db.profile.whispernoroll then CheeseSLS.db.profile.whispernoroll = false end
+		end,
+		get = function(info) return CheeseSLS.db.profile.acceptrolls end,
+	},
+	newline231 = { name="", type="description", order=231 },
+
+
 	revoke = {
 		name = L["Revoke bid"],
 		desc = L["Allows users to revoke bid"],
@@ -100,7 +115,15 @@ CheeseSLS.optionsTable = {
 		set = function(info,val) CheeseSLS.db.profile.acceptrevoke = val end,
 		get = function(info) return CheeseSLS.db.profile.acceptrevoke end,
 	},
-	newline251 = { name="", type="description", order=251 },
+	change = {
+		name = L["Change bid"],
+		desc = L["Allows users to change bid"],
+		type = "toggle",
+		order = 251,
+		set = function(info,val) CheeseSLS.db.profile.acceptchange = val end,
+		get = function(info) return CheeseSLS.db.profile.acceptchange end,
+	},
+	newline252 = { name="", type="description", order=252 },
 
 	txtoutput = { type = "header", name = L["Raid announces"], order = 300 },
 	
@@ -144,7 +167,10 @@ CheeseSLS.optionsTable = {
 		desc = L["Tells the player to bid if he rolls during bidding"],
 		type = "toggle",
 		order = 450,
-		set = function(info,val) CheeseSLS.db.profile.whispernoroll = val end,
+		set = function(info,val)
+			CheeseSLS.db.profile.whispernoroll = val
+			if CheeseSLS.db.profile.acceptrolls then CheeseSLS.db.profile.acceptrolls = false end
+		end,
 		get = function(info) return CheeseSLS.db.profile.whispernoroll end,
 	},
 	newline451 = { name="", type="description", order=451 },
@@ -325,7 +351,7 @@ function CheeseSLS:ChatCommand(inc)
 	-- or "/csls f playername [Sword of a Thousand Truths]" 
 	local cmd,user,item = strsplit(" ", inc, 3)
 
-	if strlt(cmd) == "+" then
+	if (strlt(cmd) == "+") and (user) and (item) then
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(user))
 		if currentDKP == nil then currentDKP = 0 end
 		local halfDKP = math.floor(currentDKP/2)
@@ -335,7 +361,7 @@ function CheeseSLS:ChatCommand(inc)
 		return true
 	end
 	
-	if strlt(cmd) == "f" then
+	if (strlt(cmd) == "f") and (user) and (item) then
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(user))
 		if currentDKP == nil then currentDKP = 0 end
 		bidfix = tonumber(CheeseSLS.db.profile.fixcosts)

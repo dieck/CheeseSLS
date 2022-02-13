@@ -14,6 +14,7 @@ L["Bidding ends in sec"] = function (s) return "Gebote enden in " .. s end
 -- lists
 
 L["Bid bid from players"] = function(bid,players) return "Geboten: " .. bid .. " von " .. players end
+L["Roll roll from players"] = function(roll,players) return "Gewürfelt: " .. roll .. " von " .. players end
 
 -- whispers
 

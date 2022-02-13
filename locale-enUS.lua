@@ -12,15 +12,20 @@ L["Bids prolong"] = "Bids prolong"
 L["If a new bid came in, prolong time to end if necessary"] = "If a new bid came in, prolong time to end if necessary"
 
 L["Accept bids"] = "Accept bids"
+L["Accept rolls"] = "Accept rolls"
 
 L["Raid"] = "Raid"
 L["Accept bidding in party/raidchat"] = "Accept bidding in party/raidchat"
 L["Whisper"] = "Whisper"
 L["Accept bidding by whisper"] = "Accept bidding by whisper"
+L["Rolls"] = "Rolls"
+L["Accept bidding by rolls"] = "Accept bidding by rolls"
 L["Same amount"] = "Same amount"
 L["Accept same amount bids (if disabled: earliest bid wins)"] = "Accept same amount bids (if disabled: earliest bid wins)"
 L["Revoke bid"] = "Revoke bid"
 L["Allows users to revoke bid"] = "Allows users to revoke bid"
+L["Change bid"] = "Change bid"
+L["Allows users to change bid"] = "Allows users to change bid (e.g. + to f)"
 
 
 L["Raid announces"] = "Raid announces"

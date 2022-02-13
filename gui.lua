@@ -16,6 +16,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:SetHeight(165)
 	f:SetCallback("OnClose",function(widget) AceGUI:Release(widget) end)
 
+
 	-- the item should be in cache now, was requested when bidding started
 	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemlink)
 	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
