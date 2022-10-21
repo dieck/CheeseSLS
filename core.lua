@@ -7,6 +7,7 @@ local defaults = {
 	handle_sls = false,
 	bidduration = 15,
 	bidprolong = 5,
+	bidprolongchange = 5,
 	acceptraid = true,
 	acceptwhisper = true,
 	acceptrevoke = true,
@@ -40,7 +41,7 @@ CheeseSLS.optionsTable = {
 	newline111 = { name="", type="description", order=111 },
 
 	prolong = {
-		name = L["Bids prolong"],
+		name = L["Bids prolong on new"],
 		desc = L["If a new bid came in, prolong time to end if necessary"],
 		type = "range",
 		min = 0,
@@ -50,7 +51,18 @@ CheeseSLS.optionsTable = {
 		set = function(info,val) CheeseSLS.db.profile.bidprolong = val end,
 		get = function(info) return CheeseSLS.db.profile.bidprolong end,
 	},
-	newline121 = { name="", type="description", order=121 },
+    prolongchange = {
+		name = L["Bids prolong on change"],
+		desc = L["If a bid was changed, prolong time to end if necessary"],
+		type = "range",
+		min = 0,
+		softMax = 30,
+		step = 1,
+		order = 121,
+		set = function(info,val) CheeseSLS.db.profile.bidprolongchange = val end,
+		get = function(info) return CheeseSLS.db.profile.bidprolongchange end,
+	},
+	newline122 = { name="", type="description", order=122 },
 
 	
 	txtaccepts = { type = "header", name = L["Accept bids"], order = 200 },

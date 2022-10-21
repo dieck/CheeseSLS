@@ -8,8 +8,11 @@ L["Timings"] = "Zeiten"
 
 L["Bid duration"] = "Dauer für Gebote"
 L["Initial time for a bid"] = "Erste Zeit für Gebote"
-L["Bids prolong"] = "Verlängern"
-L["If a new bid came in, prolong time to end if necessary"] = "Zeit um welche die Gebotsphase verlängert wird, wenn Gebote eingehen"
+
+L["Bids prolong on new"] = "Neue verlängern"
+L["If a new bid came in, prolong time to end if necessary"] = "Zeit um welche die Gebotsphase verlängert wird, wenn neue Gebote eingehen"
+L["Bids prolong on change"] = "Geänderte verlängern"
+L["If a bid was changed, prolong time to end if necessary"] = "Zeit um welche die Gebotsphase verlängert wird, wenn Gebote geändert werden"
 
 L["Accept bids"] = "Akzeptierte Gebote"
 L["Accept rolls"] = "Akzeptiere Würfeln"

@@ -8,8 +8,10 @@ L["Timings"] = "Timings"
 
 L["Bid duration"] = "Bid duration"
 L["Initial time for a bid"] = "Initial time for a bid"
-L["Bids prolong"] = "Bids prolong"
+L["Bids prolong on new"] = "New bids prolong"
 L["If a new bid came in, prolong time to end if necessary"] = "If a new bid came in, prolong time to end if necessary"
+L["Bids prolong on change"] = "Changed bids prolong"
+L["If a bid was changed, prolong time to end if necessary"] = "If a bid was changed, prolong time to end if necessary"
 
 L["Accept bids"] = "Accept bids"
 L["Accept rolls"] = "Accept rolls"

@@ -418,6 +418,7 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 
 	-- always allow overwriting, but not extend time for that
 	local newbid = (not CheeseSLS.db.profile.currentbidding.bids[sender])
+	local oldbid = CheeseSLS.db.profile.currentbidding.bids[sender]
 	
 	if bid == "+" then
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(sender))
@@ -440,9 +441,16 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 	end
 	
 	if newbid then
-		-- prolong time
+		-- this was a new bid
 		if CheeseSLS.db.profile.currentbidding["endTime"] < time() + CheeseSLS.db.profile.bidprolong then
 			CheeseSLS.db.profile.currentbidding["endTime"] = time() + CheeseSLS.db.profile.bidprolong
+		end
+	else
+		if CheeseSLS.db.profile.currentbidding.bids[sender] ~= oldbid then
+			-- bid was changed
+			if CheeseSLS.db.profile.currentbidding["endTime"] < time() + CheeseSLS.db.profile.bidprolongchange then
+				CheeseSLS.db.profile.currentbidding["endTime"] = time() + CheeseSLS.db.profile.bidprolongchange
+			end
 		end
 	end
 
