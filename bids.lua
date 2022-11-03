@@ -417,8 +417,10 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 	if CheeseSLS.db.profile.whisperreceived then
 		if bid == '+' then
 			SendChatMessage(L["Received your bid bid for itemLink"]("Half DKP (main)", CheeseSLS.db.profile.currentbidding.itemLink), "WHISPER", nil, sender)
+			CheeseSLS:sendReceivedBid("FULL")
 		elseif bid == 'o' or bid == 'f' then
 			SendChatMessage(L["Received your bid bid for itemLink"]("Fix costs (off)", CheeseSLS.db.profile.currentbidding.itemLink), "WHISPER", nil, sender)
+			CheeseSLS:sendReceivedBid("FIX")
 		end
 	end
 
@@ -431,6 +433,7 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 		if currentDKP == nil then currentDKP = 0 end
 		local halfDKP = currentDKP/2 --no math.floor rounding yet, allow for bidding half points => dkp lead wins
 		CheeseSLS.db.profile.currentbidding.bids[sender] = halfDKP
+		CheeseSLS:sendReceivedBid("FULL")
 	end
 	
 	if strlower(bid) == "f" or strlower(bid) == "o" then
@@ -444,6 +447,7 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 			SendChatMessage(msg, "WHISPER", nil, sender)
 		end
 		CheeseSLS.db.profile.currentbidding.bids[sender] = bidfix
+		CheeseSLS:sendReceivedBid("FIX")
 	end
 	
 	if newbid then
@@ -526,6 +530,7 @@ function CheeseSLS:CHAT_MSG_SYSTEM (event, text)
 		-- only note bids if bids are running currently (would trigger on requested rolls for same bid otherwise)
 		if (CheeseSLS.db.profile.currentbidding.bids) then 
 			CheeseSLS.db.profile.currentbidding.bids[sender] = -roll
+			CheeseSLS:sendReceivedBid("ROLL")
 		end
 		
 	else
