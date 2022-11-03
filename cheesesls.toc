@@ -2,7 +2,7 @@
 ## Title: CheeseSLS
 ## Notes: Addon to implement Shroud Loot System for GoogleSheetDKP
 ## Author: dieck
-## Version: 20220213
+## Version: 20221103
 ## Dependencies: GoogleSheetDKP
 ## SavedVariables: CheeseSLSDB
 
@@ -18,5 +18,6 @@ locale-deDE.lua
 
 gui.lua
 bids.lua
+comms.lua
 core.lua
 

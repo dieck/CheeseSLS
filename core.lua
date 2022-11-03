@@ -284,6 +284,7 @@ function CheeseSLS:OnInitialize()
   self:RegisterEvent("CHAT_MSG_RAID_LEADER")
   self:RegisterEvent("CHAT_MSG_RAID_WARNING")
   self:RegisterEvent("CHAT_MSG_SYSTEM")
+  self:RegisterEvent("CHAT_MSG_LOOT")
  
   self:RegisterChatCommand("csls", "ChatCommand")
   

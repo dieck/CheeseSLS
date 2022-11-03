@@ -138,6 +138,9 @@ function CheeseSLS:StartBidding(itemLink)
 		end
 	end
 	
+	-- send out comms to CheeseSLSClient
+	CheeseSLS:sendBiddingStart(itemLink)
+	
 	CheeseSLS.db.profile.currentbidding = {}
 	CheeseSLS.db.profile.currentbidding["itemLink"] = itemLink
 	CheeseSLS.db.profile.currentbidding["endTime"] = time() + CheeseSLS.db.profile.bidduration
@@ -231,6 +234,9 @@ function CheeseSLS:BidTimerHandler()
 	-- look if timer expired
 	if CheeseSLS.db.profile.currentbidding["endTime"] < time() then
 		CheeseSLS:Output(L["Bidding ended!"])
+		
+		-- send to CheeseSLSClient
+		CheeseSLS:sendBiddingStop(itemLink)
 
 		bids = CheeseSLS.db.profile.currentbidding.bids
 
