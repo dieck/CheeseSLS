@@ -1,4 +1,5 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
+local deformat = LibStub("LibDeformat-3.0");
 
 CheeseSLS.SENDTO = "RAID"
 
@@ -44,22 +45,57 @@ end
 -- send out "new" loot to CheeseSLSClients
 
 function CheeseSLS:sendLootQueued(itemLink)
-	local commmsg = { command = "LOOT_QUEUED", version = CheeseSLS.commVersion, itemLink = itemLink }
+	local commmsg = { command = "LOOT_QUEUED", version = CheeseSLS.commVersion, itemLink = itemLink, queueTime = time() }
+	CheeseSLS:Print(CheeseSLS:Serialize(commmsg))
 	CheeseSLS:SendCommMessage(CheeseSLS.commPrefix, CheeseSLS:Serialize(commmsg), CheeseSLS.SENDTO, nil, "BULK")
 end
 
+-- to ignore trade windows, which also give the EXACT SAME CHAT_MSG_LOOT. WTF Blizzard.
+
+function CheeseSLS:TRADE_SHOW()
+	CheeseSLS.tradeWindow = true
+end
+
+function CheeseSLS:TRADE_CLOSED()
+	-- give CHAT_MSG_LOOT about 1 second to catch up before assuming it's not a trade anymore
+	CheeseSLS:ScheduleTimer(function() CheeseSLS.tradeWindow = false end, 1)
+end
+
+
 function CheeseSLS:CHAT_MSG_LOOT(event, text, sender)
-	-- text - e.g. "You receive loot: |cffffffff|Hitem:2589::::::::20:257::::::|h[Linen Cloth]|h|rx2."
+	-- ignore trade window loot
+	if CheeseSLS.tradeWindow then return end
 
-	-- TODO: localization
-	beginning = "You receive loot: "
-	ending = "."
-
-	if not (text:sub(1, #beginning) == beginning) then return end
-	if not (text:sub(-#ending) == ending) then return end
-
-	local itemLink = text:sub((#beginning+1), -(#ending+1))
+	-- validation code from MizusRaidTracker, under GPL 3.0, Author Mîzukichan@EU-Antonidas
 	
+	-- patterns LOOT_ITEM / LOOT_ITEM_SELF are also valid for LOOT_ITEM_MULTIPLE / LOOT_ITEM_SELF_MULTIPLE - but not the other way around - try these first
+	-- first try: somebody else received multiple loot (most parameters)
+	local playerName, itemLink, itemCount = deformat(text, LOOT_ITEM_MULTIPLE)
+	
+	-- next try: somebody else received single loot
+	if (playerName == nil) then
+		itemCount = 1
+		playerName, itemLink = deformat(text, LOOT_ITEM)
+	end
+	
+	-- if player == nil, then next try: player received multiple loot
+	if (playerName == nil) then
+		playerName = UnitName("player")
+		itemLink, itemCount = deformat(text, LOOT_ITEM_SELF_MULTIPLE)
+	end
+	
+	-- if itemLink == nil, then last try: player received single loot
+	if (itemLink == nil) then
+		itemCount = 1
+		itemLink = deformat(text, LOOT_ITEM_SELF)
+	end
+
+	-- if itemLink == nil, then there was neither a LOOT_ITEM, nor a LOOT_ITEM_SELF message
+	if (itemLink == nil) then 
+		-- No valid loot event received.
+		return
+	end
+
 	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemLink)
 
     -- check for disenchant mats
