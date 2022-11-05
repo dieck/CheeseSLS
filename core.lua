@@ -284,18 +284,6 @@ function CheeseSLS:OnInitialize()
   self:RegisterEvent("CHAT_MSG_RAID_LEADER")
   self:RegisterEvent("CHAT_MSG_RAID_WARNING")
   self:RegisterEvent("CHAT_MSG_SYSTEM")
-  self:RegisterEvent("CHAT_MSG_LOOT")
- 
-  -- self:RegisterEvent("LOOT_OPENED")
-  -- self:RegisterEvent("LOOT_CLOSED") -- from wowpedia: Note that this will fire before the last CHAT_MSG_LOOT event for that loot.
-
-  -- self:RegisterEvent("START_LOOT_ROLL")
-  -- self:RegisterEvent("LOOT_ROLLS_COMPLETE") -- so most likely this could as well be before last CHAT_MSG_LOOT
-
-  -- use only TRADE for now, to be ignored. I don't care which kind of Loot it actually was
-  self:RegisterEvent("TRADE_SHOW")
-  self:RegisterEvent("TRADE_CLOSED") -- so most likely this could as well be before last CHAT_MSG_LOOT
-
 
   self:RegisterChatCommand("csls", "ChatCommand")
   
