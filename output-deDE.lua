@@ -24,6 +24,7 @@ L["Can not accept your bid bid for itemLink"] = function(bid, itemLink) return "
 L["Accepted your bid bid for itemLink"] = function (bid, itemLink) return "Dein Gebot " .. bid .. " für " .. itemLink .. " wurde akzeptiert." end -- Denk dran, du kannst jederzeit passen mit -" end
 L["You already bid bid for itemLink"] = function (bid, itemLink) return "Du hast bereits " .. bid .. " geboten für " .. itemLink .. "." end -- Denk dran, du kannst jederzeit passen mit -" end
 L["LOW BID! Your bid of bid for itemLink is NOT current max bid!"] = function (bid, itemLink) return "NIEDRIGES GEBOT! Dein Gebot " .. bid .. " für " .. itemLink .. " ist NICHT das höchste Gebot jetzt!" end
+L["Please collect your item from"] = function (name) return "Bitte hole dein Item von " .. name .. " ab." end
 
 -- rules
 

@@ -24,7 +24,7 @@ L["Can not accept your bid bid for itemLink"] = function(bid, itemLink) return "
 L["Accepted your bid bid for itemLink"] = function (bid, itemLink) return "Accepted your bid " .. bid .. " for " .. itemLink .. "." end -- Remember you can always pass with -" end
 L["You already bid bid for itemLink"] = function (bid, itemLink) return "You already bid " .. bid .. " for " .. itemLink .. "." end -- Remember you can always pass with -" end
 L["LOW BID! Your bid of bid for itemLink is NOT current max bid!"] = function (bid, itemLink) return "LOW BID! Your bid of " .. bid .. " for " .. itemLink .. " is NOT current max bid!" end
-
+L["Please collect your item from"] = function (name) return "Please collect your item from " .. name end
 
 -- rules
 
