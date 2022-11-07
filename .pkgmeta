@@ -1,4 +1,4 @@
-package-as: CheeseSLSClient
+package-as: CheeseSLS
 
 externals:
   libs/LibStub:
