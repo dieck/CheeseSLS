@@ -3,7 +3,7 @@
 ## Notes: Addon to implement Shroud Loot System for GoogleSheetDKP
 ## Author: dieck
 ## Version: 20221103
-## Dependencies: GoogleSheetDKP
+## Dependencies: GoogleSheetDKP, RollTrackerClassicZ
 ## SavedVariables: CheeseSLSDB
 
 embeds.xml
