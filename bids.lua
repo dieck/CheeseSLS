@@ -555,10 +555,25 @@ function CheeseSLS:CHAT_MSG_SYSTEM (event, text)
 
 		-- only note bids if bids are running currently (would trigger on requested rolls for same bid otherwise)
 		if (CheeseSLS.db.profile.currentbidding.bids) then 
+			local oldbits = CheeseSLS.db.profile.currentbidding.bids[sender]
+
 			CheeseSLS.db.profile.currentbidding.bids[sender] = -roll
 			CheeseSLS:sendReceivedBid("ROLL")
+
+			if oldbits then
+				-- this was a change
+				if CheeseSLS.db.profile.currentbidding["endTime"] < time() + CheeseSLS.db.profile.bidprolongchange then
+					CheeseSLS.db.profile.currentbidding["endTime"] = time() + CheeseSLS.db.profile.bidprolongchange
+				end
+			else
+				-- this was a new bid
+				if CheeseSLS.db.profile.currentbidding["endTime"] < time() + CheeseSLS.db.profile.bidprolong then
+					CheeseSLS.db.profile.currentbidding["endTime"] = time() + CheeseSLS.db.profile.bidprolong
+				end
+			end
+
 		end
-		
+
 	else
 		-- not accepting rolls
 		if CheeseSLS.db.profile.whispernoroll then 
