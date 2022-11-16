@@ -2,6 +2,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
 local deformat = LibStub("LibDeformat-3.0");
 
 CheeseSLS.SENDTO = "RAID"
+-- debug: /script CheeseSLS.SENDTO = "SAY"
 
 CheeseSLS.commPrefix = "CheeseSLS-1.0-"
 CheeseSLS.commVersion = 20221103
@@ -27,6 +28,11 @@ end
 
 function CheeseSLS:sendReceivedBid(bidtype)
 	local commmsg = { command = "GOT_" .. strupper(bidtype), version = CheeseSLS.commVersion }
+	CheeseSLS:SendCommMessage(CheeseSLS.commPrefix, CheeseSLS:Serialize(commmsg), CheeseSLS.SENDTO, nil, "NORMAL")
+end
+
+function CheeseSLS:sendWinningNotification(lootTrackerId, winner)
+	local commmsg = { command = "WINNING_NOTIFICATION", version = CheeseSLS.commVersion, lootTrackerId = lootTrackerId, winner = winner }
 	CheeseSLS:SendCommMessage(CheeseSLS.commPrefix, CheeseSLS:Serialize(commmsg), CheeseSLS.SENDTO, nil, "NORMAL")
 end
 

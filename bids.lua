@@ -98,7 +98,7 @@ function CheeseSLS:OutputFullList(lst)
 	end
 end
 
-function CheeseSLS:StartBidding(itemLink, holdingPlayer)
+function CheeseSLS:StartBidding(itemLink, holdingPlayer, lootTrackerId)
 
 	if not (CheeseSLS.db.profile.currentbidding.itemLink == nil) then
 		CheeseSLS:Print(L["Bidding for itemLink still running, cannot start new bidding now!"](CheeseSLS.db.profile.currentbidding.itemLink))
@@ -140,14 +140,15 @@ function CheeseSLS:StartBidding(itemLink, holdingPlayer)
 	
 	-- send out comms to CheeseSLSClient
 	CheeseSLS:sendBiddingStart(itemLink)
-	
+
 	CheeseSLS.db.profile.currentbidding = {}
 	CheeseSLS.db.profile.currentbidding["itemLink"] = itemLink
 	CheeseSLS.db.profile.currentbidding["holdingPlayer"] = holdingPlayer
+	CheeseSLS.db.profile.currentbidding["lootTrackerId"] = lootTrackerId
 	CheeseSLS.db.profile.currentbidding["endTime"] = time() + CheeseSLS.db.profile.bidduration
-	
+
 	CheeseSLS.db.profile.currentbidding["bids"] = {}
-	
+
 	CheeseSLS.biddingTimer = CheeseSLS:ScheduleRepeatingTimer("BidTimerHandler", 1)
 
 	return true
@@ -155,6 +156,7 @@ end
 
 function CheeseSLS:GetRaiderList(bids)
 	local names = {}
+	if bids == nil then bids = {} end
 
 	if GetNumGroupMembers() == 0 then 
 		names[UnitName("player")] = UnitName("player")
@@ -285,7 +287,11 @@ function CheeseSLS:BidTimerHandler()
 					if CheeseSLS.db.profile.currentbidding["holdingPlayer"] then
 						SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, name)
 					end
+					if CheeseSLS.db.profile.currentbidding["lootTrackerId"] then
+						CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], name)
+					end
 					local f = CheeseSLS:createRequestDialogFrame(name, -newmaxrounded, CheeseSLS.db.profile.currentbidding.itemLink, raiders)
+CheeseSLS:Debug("BidTimerHandler maxplayers1 createRequestDialogFrame")
 					f:Show()
 				end
 			elseif #maxplayers > 1 then
@@ -304,9 +310,13 @@ function CheeseSLS:BidTimerHandler()
 					if CheeseSLS.db.profile.currentbidding["holdingPlayer"] then
 						SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, name)
 					end
+					if CheeseSLS.db.profile.currentbidding["lootTrackerId"] then
+						CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], name)
+					end
 					local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
 					-- requesting storing 0 DKP bid
 					local f = CheeseSLS:createRequestDialogFrame(name, 0, CheeseSLS.db.profile.currentbidding.itemLink, raiders)
+CheeseSLS:Debug("BidTimerHandler minplayers1 createRequestDialogFrame")
 					f:Show()
 				end
 
@@ -389,8 +399,12 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 		if CheeseSLS.db.profile.currentbidding["holdingPlayer"] then
 			SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, rtcmatch)
 		end
+		if CheeseSLS.db.profile.currentbidding["lootTrackerId"] then
+			CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], rtcmatch)
+		end
 		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.lastbidding.bids)
 		local f = CheeseSLS:createRequestDialogFrame(rtcmatch, -bidrounded, CheeseSLS.db.profile.lastbidding.itemLink, raiders)
+CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 		f:Show()
 	end
 
