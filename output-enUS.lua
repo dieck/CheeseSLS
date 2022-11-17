@@ -32,7 +32,7 @@ L["Rules:"] = "Rules:"
 
 L["Bidding runs s sec"] = function(s) return "Bidding runs " .. s .. "sec" end
 L["Bids extend time by s sec"] = function(s) return "Bids extend time by " .. s .. "sec" end
-	
+
 L["Bids accepted"] = "Bids accepted"
 
 L["in Chat or by Whisper to p"] = function(p) return "in Chat or by Whisper to " .. p end

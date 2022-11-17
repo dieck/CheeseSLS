@@ -1,7 +1,7 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
 
 -- Output to Raid chat, Party chat or chat window
-function CheeseSLS:CanDoRaidWarning() 
+function CheeseSLS:CanDoRaidWarning()
 	for i = 1, MAX_RAID_MEMBERS do
 		local name, rank = GetRaidRosterInfo(i)
 		if name == UnitName("player") then
@@ -39,7 +39,7 @@ function CheeseSLS:Output(msg)
 	end
 end
 
-function pairsByKeys (t, f)
+local function pairsByKeys (t, f)
     local a = {}
     for n in pairs(t) do table.insert(a, n) end
     table.sort(a, f)
@@ -54,12 +54,12 @@ function pairsByKeys (t, f)
 end
 
 function CheeseSLS:OutputFullList(lst)
-	o = nil
+	local o = nil
 	if CheeseSLS.db.profile.outputfull_raid then o = function(txt) CheeseSLS:Output(txt) end end
 	if CheeseSLS.db.profile.outputfull_user then o = function(txt) CheeseSLS:Print(txt) end end
 	if o == nil then return nil end
 
-	if lst == nil then 
+	if lst == nil then
 		lst = CheeseSLS.db.profile.currentbidding.bids
 	end
 
@@ -75,8 +75,8 @@ function CheeseSLS:OutputFullList(lst)
 	end
 
 	-- transpose table, split to bids and rolls
-	bidsbybids = {}
-	bidsbyrolls = {}
+	local bidsbybids = {}
+	local bidsbyrolls = {}
 
 	for player,bid in pairs(lst) do
 		if bid < 0 then
@@ -89,35 +89,35 @@ function CheeseSLS:OutputFullList(lst)
 	end
 
 	for bid,users in pairsByKeys(bidsbybids) do
-		players = table.concat(users, ", ")
+		local players = table.concat(users, ", ")
 		o(L["Bid bid from players"](bid, players))
 	end
 	for bid,users in pairsByKeys(bidsbyrolls) do
-		players = table.concat(users, ", ")
+		local players = table.concat(users, ", ")
 		o(L["Roll roll from players"](bid, players))
 	end
 end
 
 function CheeseSLS:StartBidding(itemLink, holdingPlayer, lootTrackerId)
 
-	if not (CheeseSLS.db.profile.currentbidding.itemLink == nil) then
+	if CheeseSLS.db.profile.currentbidding.itemLink ~= nil then
 		CheeseSLS:Print(L["Bidding for itemLink still running, cannot start new bidding now!"](CheeseSLS.db.profile.currentbidding.itemLink))
 		return nil
 	end
-	
+
 	-- ensure cached GetItemInfo for gui later
-	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemLink)	
+	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemLink)
 	GetItemInfo(itemId)
-	
-	startnotice = L["Start Bidding now: itemLink"](itemLink)
-	
+
+	local startnotice = L["Start Bidding now: itemLink"](itemLink)
+
 	-- turn on Need and Greed modus of RTC, needed for output validation to book on rolls
 	RollTrackerClassic_Addon.DB.NeedAndGreed = true
 	-- clear old roll from before the bidding
 	RollTrackerClassic_Addon.ClearRolls()
-	
+
 	if UnitInRaid("player") then
-	
+
 		if CheeseSLS:CanDoRaidWarning() then
 			SendChatMessage(startnotice, "RAID_WARNING")
 		else
@@ -137,7 +137,7 @@ function CheeseSLS:StartBidding(itemLink, holdingPlayer, lootTrackerId)
 			CheeseSLS:Print(L["You are not in a party or raid. So here we go: Have fun bidding for itemLink against yourself."](itemLink))
 		end
 	end
-	
+
 	-- send out comms to CheeseSLSClient
 	CheeseSLS:sendBiddingStart(itemLink)
 
@@ -158,29 +158,29 @@ function CheeseSLS:GetRaiderList(bids)
 	local names = {}
 	if bids == nil then bids = {} end
 
-	if GetNumGroupMembers() == 0 then 
+	if GetNumGroupMembers() == 0 then
 		names[UnitName("player")] = UnitName("player")
-		return names 
+		return names
 	end
 
 	for i = 1, GetNumGroupMembers() do
 		local name, rank, subgroup, level, class, fileName, zone, online, isDead, role, isML = GetRaidRosterInfo(i)
-	
+
 		local dkp = GoogleSheetDKP:GetDKP(name)
 		if dkp == nil then dkp = 0 end
 
 		names[name] = name .. " (" .. dkp .. " DKP)"
-					
+
 		if bids[name] ~= nil then
 			names[name] = names[name] .. " [Bid: " .. bids[name] .. "]"
 		end
-		
+
 	end
 
 	return names
 end
 
-local function tcopy(src) 
+local function tcopy(src)
 	local dest = {}
 	for idx, val in pairs(src) do
 		if type(val) == "table" then
@@ -193,61 +193,61 @@ local function tcopy(src)
 end
 
 function CheeseSLS:SecondBidder()
-	if not (CheeseSLS.db.profile.currentbidding.itemLink == nil) then
+	if CheeseSLS.db.profile.currentbidding.itemLink ~= nil then
 		CheeseSLS:Print(L["Bidding for itemLink still running, cannot start new bidding now!"](CheeseSLS.db.profile.currentbidding.itemLink))
 		return nil
 	end
-	
+
 	if CheeseSLS.db.profile.lastbidding == nil or CheeseSLS.db.profile.lastbidding.itemLink == nil then
 		CheeseSLS:Print("No last recorded bidding, cannot get second bidder")
 		return nil
 	end
-	
-	itemLink = CheeseSLS.db.profile.lastbidding.itemLink
+
+	local itemLink = CheeseSLS.db.profile.lastbidding.itemLink
 
 	if itemLink == nil then
 		GoogleSheetDKP:Debug("No Itemlink given for requesting last item")
-		return nil 
+		return nil
 	end
-	
+
 	local id = itemLink:match("|Hitem:(%d+):")
 	if id then
 
 		local lasthistory =  GoogleSheetDKP:FindLastItem(itemLink)
-		
-		if tempty(lasthistory) then
+
+		if CheeseSLS:tempty(lasthistory) then
 			GoogleSheetDKP:Debug("Cannot find last history entry for " .. itemLink)
 			return nil
 		end
 
 		-- copy table (do not link by pointer only)
 		CheeseSLS.db.profile.currentbidding = tcopy(CheeseSLS.db.profile.lastbidding)
-	
+
 		-- remove user who got last loot from bidding
 		CheeseSLS.db.profile.currentbidding.bids[lasthistory.name] = nil
 
 		-- no need for a bid timer, that already happened. So just work with the data
 		CheeseSLS:BidTimerHandler()
-		
+
 	end
 
 end
 
 function CheeseSLS:BidTimerHandler()
-	
+
 	-- look if timer expired
 	if CheeseSLS.db.profile.currentbidding["endTime"] < time() then
 		CheeseSLS:Output(L["Bidding ended!"])
-		
+
 		-- send to CheeseSLSClient
-		CheeseSLS:sendBiddingStop(itemLink)
+		CheeseSLS:sendBiddingStop(CheeseSLS.db.profile.currentbidding.itemLink)
 
-		bids = CheeseSLS.db.profile.currentbidding.bids
+		local bids = CheeseSLS.db.profile.currentbidding.bids
 
-		if tempty(bids) then
+		if CheeseSLS:tempty(bids) then
 			CheeseSLS:OutputWithWarning(L["No one bid on itemLink"](CheeseSLS.db.profile.currentbidding.itemLink))
 		else
-	
+
 			-- find highest bidder(s)
 			local maxbid = -1
 			local maxplayers = {}
@@ -256,8 +256,8 @@ function CheeseSLS:BidTimerHandler()
 			local minbid = 0
 			local minplayers = {}
 
-			for name,bid in pairs(bids) do 
-				if bid > maxbid then 
+			for name,bid in pairs(bids) do
+				if bid > maxbid then
 					maxplayers = {}
 					maxbid = bid
 				end
@@ -265,7 +265,7 @@ function CheeseSLS:BidTimerHandler()
 					tinsert(maxplayers, name)
 				end
 
-				if bid < minbid then 
+				if bid < minbid then
 					minplayers = {}
 					minbid = bid
 				end
@@ -275,8 +275,8 @@ function CheeseSLS:BidTimerHandler()
 			end
 
 			-- show rounding to players (in case of arguments)
-			newmaxrounded = math.floor(maxbid)
-			bidtext = newmaxrounded
+			local newmaxrounded = math.floor(maxbid)
+			local bidtext = newmaxrounded
 			if newmaxrounded ~= maxbid then bidtext = newmaxrounded .. " (" .. maxbid .. ")" end
 
 			if #maxplayers == 1 then
@@ -330,20 +330,20 @@ CheeseSLS:Debug("BidTimerHandler minplayers1 createRequestDialogFrame")
 				RollTrackerClassic_Addon.ClearRolls()
 
 			end
-			
+
 		end
-		
+
 		CheeseSLS.db.profile.lastbidding = CheeseSLS.db.profile.currentbidding
-		
+
 		CheeseSLS:OutputFullList()
-		
+
 		CheeseSLS.db.profile.currentbidding = {}
 		CheeseSLS:CancelTimer(CheeseSLS.biddingTimer)
 		return nil
 	end
-	
+
 	-- if timer didn't expire yet, count down the last seconds
-	rest = CheeseSLS.db.profile.currentbidding["endTime"] - time() 
+	local rest = CheeseSLS.db.profile.currentbidding["endTime"] - time()
 
 	if rest <= 3 then
 		if (rest > 0) then
@@ -351,7 +351,7 @@ CheeseSLS:Debug("BidTimerHandler minplayers1 createRequestDialogFrame")
 		end
 		return nil
 	end
-	
+
 end
 
 -- different kinds of incoming messages
@@ -367,20 +367,20 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 
 	-- playerName may contain "-REALM"
 	sender = strsplit("-", sender)
-	
+
 	-- manage roll tracker outputs
 	local rtcrgxp = RollTrackerClassic_Addon.GetLocale()["MsgAnnounce"] -- "%s won with a roll of %d."
 	rtcrgxp = string.gsub(rtcrgxp, "%%s", "(%%w+)")
 	rtcrgxp = string.gsub(rtcrgxp, "%%d", "%%d+")
 	rtcrgxp = "RTC: %w+! " .. rtcrgxp -- "RTC: %w+! (%w+) won with a roll of %d+."
-	
+
 	-- RTC: Need! Pfennich won with a roll of 99.
-	local rtcmatch = string.match(text, rtcrgxp)	
-	
+	local rtcmatch = string.match(text, rtcrgxp)
+
 	if rtcmatch ~= nil then CheeseSLS:Debug("Found RTC match") end
-	
+
 	if rtcmatch ~= nil and CheeseSLS.db.profile.lastbidding ~= nil then
-	
+
 		if CheeseSLS.db.profile.lastbidding["bids"] == nil then
 			CheeseSLS:Print("Got roll result, but no biddings were recorded for " .. CheeseSLS.db.profile.lastbidding.itemLink .. " at all")
 			return nil
@@ -390,12 +390,11 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 			CheeseSLS:Print("Got winning roll result for " .. rtcmatch .. " but no biddings were recorded for " .. CheeseSLS.db.profile.lastbidding.itemLink)
 			return nil
 		end
-		
-		-- show rounding to players (in case of arguments)
-		bidorig = CheeseSLS.db.profile.lastbidding.bids[rtcmatch]
-		bidrounded = math.floor(bidorig)
-		bidtext = bidrounded
-		if bidrounded ~= bidorig then bidtext = bidrounded .. " (" .. bidorig .. ")" end
+
+		-- nothing to show to players here, will just book it. Already shown rounding before to players
+		local bidorig = CheeseSLS.db.profile.lastbidding.bids[rtcmatch]
+		local bidrounded = math.floor(bidorig)
+
 		if CheeseSLS.db.profile.currentbidding["holdingPlayer"] then
 			SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, rtcmatch)
 		end
@@ -404,7 +403,6 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 		end
 		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.lastbidding.bids)
 		local f = CheeseSLS:createRequestDialogFrame(rtcmatch, -bidrounded, CheeseSLS.db.profile.lastbidding.itemLink, raiders)
-CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 		f:Show()
 	end
 
@@ -415,17 +413,17 @@ CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 	if orig == "WHISPER" and not CheeseSLS.db.profile.acceptwhisper then return nil end
 	-- does not accept in group notes => ignore
 	if orig == "GRP" and not CheeseSLS.db.profile.acceptraid then return nil end
-	
+
 	-- accept revokes
 	if text == "-" and CheeseSLS.db.profile.acceptrevoke then
-		CheeseSLS.db.profile.currentbidding.bids[sender] = nil 
+		CheeseSLS.db.profile.currentbidding.bids[sender] = nil
 		SendChatMessage(L["You passed on itemLink"](CheeseSLS.db.profile.currentbidding.itemLink), "WHISPER", nil, sender)
 		return
 	end
-	
-	trimmed = strtrim(text)
-	bid = strlower(trimmed)
-	
+
+	local trimmed = strtrim(text)
+	local bid = strlower(trimmed)
+
 	-- accepting: + for main spec, o/O/f/F for off spec/fix bid
 	if not (bid == '+' or bid == 'o' or bid == 'f') then
 		-- not a bid, ignoring
@@ -439,7 +437,7 @@ CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 		return nil;
 	end
 
-	
+
 	if CheeseSLS.db.profile.whisperreceived then
 		if bid == '+' then
 			SendChatMessage(L["Received your bid bid for itemLink"]("Half DKP (main)", CheeseSLS.db.profile.currentbidding.itemLink), "WHISPER", nil, sender)
@@ -453,7 +451,7 @@ CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 	-- always allow overwriting, but not extend time for that
 	local newbid = (not CheeseSLS.db.profile.currentbidding.bids[sender])
 	local oldbid = CheeseSLS.db.profile.currentbidding.bids[sender]
-	
+
 	if bid == "+" then
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(sender))
 		if currentDKP == nil then currentDKP = 0 end
@@ -461,12 +459,12 @@ CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 		CheeseSLS.db.profile.currentbidding.bids[sender] = halfDKP
 		CheeseSLS:sendReceivedBid("FULL")
 	end
-	
+
 	if strlower(bid) == "f" or strlower(bid) == "o" then
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(sender))
 		if currentDKP == nil then currentDKP = 0 end
-		bidfix = tonumber(CheeseSLS.db.profile.fixcosts)
-		if currentDKP < bidfix then 
+		local bidfix = tonumber(CheeseSLS.db.profile.fixcosts)
+		if currentDKP < bidfix then
 			bidfix = currentDKP
 			local msg = "You don't have enough DKP for Fix Bid. I will bid all remaining DKP."
 			if CheeseSLS.db.profile.acceptrevoke then msg = msg .. " If you don't want this, please retract your bid with '-'." end
@@ -475,7 +473,7 @@ CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 		CheeseSLS.db.profile.currentbidding.bids[sender] = bidfix
 		CheeseSLS:sendReceivedBid("FIX")
 	end
-	
+
 	if newbid then
 		-- this was a new bid
 		if CheeseSLS.db.profile.currentbidding["endTime"] < time() + CheeseSLS.db.profile.bidprolong then
@@ -493,11 +491,11 @@ CheeseSLS:Debug("IncomingChat createRequestDialogFrame")
 end
 
 function CheeseSLS:OutputRules()
-	r = {}
-	
+	local r = {}
+
 	table.insert(r, L["Bidding runs s sec"](CheeseSLS.db.profile.bidduration))
 	if CheeseSLS.db.profile.bidprolong > 0 then table.insert(r, L["Bids extend time by s sec"](CheeseSLS.db.profile.bidprolong)) end
-	
+
 	table.insert(r, L["Bids accepted"] .. " " .. CheeseSLS:GetRulesWhere())
 	if CheeseSLS.db.profile.acceptrevoke 	then table.insert(r, L["Revoke by - possible"]) 				else table.insert(r, L["No revocation of bids"]) end
 
@@ -507,14 +505,14 @@ end
 function CheeseSLS:GetRulesWhere()
 	if CheeseSLS.db.profile.acceptraid and CheeseSLS.db.profile.acceptwhisper then
 		return L["in Chat or by Whisper to p"](UnitName("player"))
-	else 
-		if CheeseSLS.db.profile.acceptraid then 
+	else
+		if CheeseSLS.db.profile.acceptraid then
 			return L["only in Chat"]
 		end
-		if CheeseSLS.db.profile.acceptwhisper then 
+		if CheeseSLS.db.profile.acceptwhisper then
 			return L["only by Whisper to p"](UnitName("player"))
 		end
-	end	
+	end
 end
 
 function CheeseSLS:CHAT_MSG_SYSTEM (event, text)
@@ -554,7 +552,7 @@ function CheeseSLS:CHAT_MSG_SYSTEM (event, text)
 		end
 
 		-- only note bids if bids are running currently (would trigger on requested rolls for same bid otherwise)
-		if (CheeseSLS.db.profile.currentbidding.bids) then 
+		if (CheeseSLS.db.profile.currentbidding.bids) then
 			local oldbits = CheeseSLS.db.profile.currentbidding.bids[sender]
 
 			CheeseSLS.db.profile.currentbidding.bids[sender] = -roll
@@ -576,7 +574,7 @@ function CheeseSLS:CHAT_MSG_SYSTEM (event, text)
 
 	else
 		-- not accepting rolls
-		if CheeseSLS.db.profile.whispernoroll then 
+		if CheeseSLS.db.profile.whispernoroll then
 			SendChatMessage(L["We are bidding, not rolling. Please state your bid where"](CheeseSLS:GetRulesWhere()), "WHISPER", nil, sender)
 		end
 	end

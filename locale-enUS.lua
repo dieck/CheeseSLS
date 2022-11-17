@@ -77,7 +77,7 @@ L["You don't have assist, so I cannot put out Raid Warnings"] = "You don't have 
 L["You are not in a party or raid. So here we go: Have fun bidding for itemLink against yourself."] = function(itemLink) return "You are not in a party or raid. So here we go: Have fun bidding for " .. itemLink .. " against yourself." end
 
 
--- load default outputs 
+-- load default outputs
 for k,v in pairs(CheeseSLS.outputLocales["enUS"]) do L[k] = v end
 
 end -- if L then

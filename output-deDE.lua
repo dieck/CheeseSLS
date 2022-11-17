@@ -32,7 +32,7 @@ L["Rules:"] = "Regeln:"
 
 L["Bidding runs s sec"] = function(s) return "Gebote laufen " .. s .. "sec" end
 L["Bids extend time by s sec"] = function(s) return "Neues Gebot verlängert um " .. s .. "sec" end
-	
+
 L["Bids accepted"] = "Akzeptiere Gebote"
 
 L["in Chat or by Whisper to p"] = function(p) return "im Raidchat oder geflüstert an " .. p end

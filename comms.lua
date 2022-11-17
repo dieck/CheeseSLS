@@ -16,8 +16,8 @@ function CheeseSLS:sendBiddingStart(itemLink)
 		acceptrevoke = CheeseSLS.db.profile.acceptrevoke,
 		acceptrolls = CheeseSLS.db.profile.acceptrolls
 	}
-	
-	commser = CheeseSLS:Serialize(commmsg)
+
+	local commser = CheeseSLS:Serialize(commmsg)
     CheeseSLS:SendCommMessage(CheeseSLS.commPrefix, commser, CheeseSLS.SENDTO, nil, "ALERT")
 end
 
@@ -38,13 +38,13 @@ end
 
 
 function CheeseSLS:debugBiddingStart()
-    itemLink = "\124cffff8000\124Hitem:199914::::::::80:::::\124h[Glowing Pebble]\124h\124r"
-	CheeseSLS:sendBiddingStart(itemLink)	
+    local itemLink = "\124cffff8000\124Hitem:199914::::::::80:::::\124h[Glowing Pebble]\124h\124r"
+	CheeseSLS:sendBiddingStart(itemLink)
 end
 
 function CheeseSLS:debugBiddingStop()
-   itemLink = "\124cffff8000\124Hitem:199914::::::::80:::::\124h[Glowing Pebble]\124h\124r"
-	CheeseSLS:sendBiddingStop(itemLink)	
+	local itemLink = "\124cffff8000\124Hitem:199914::::::::80:::::\124h[Glowing Pebble]\124h\124r"
+	CheeseSLS:sendBiddingStop(itemLink)
 end
 
 

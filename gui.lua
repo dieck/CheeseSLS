@@ -2,7 +2,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
 
 function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	local AceGUI = LibStub("AceGUI-3.0")
-	
+
 	if CheeseSLS.slsdatastore == nil then CheeseSLS.slsdatastore = {} end
 	local guiid = "itemlink" .. time()
 	local slsdata = { user=user, dkp=dkp, itemlink=itemlink }
@@ -40,7 +40,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	lbText:SetText(itemLink)
 	lbText:SetRelativeWidth(0.7)
 	f:AddChild(lbText)
-	
+
 	local edDKP = AceGUI:Create("EditBox")
 	edDKP.guiid = guiid
 	edDKP:SetText(-dkp)
@@ -49,26 +49,26 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	edDKP:SetCallback("OnEnterPressed", function(widget)
 		local newdkp = widget:GetText()
 
-		if newdkp == nil then 
+		if newdkp == nil then
 			CheeseSLS:Print("Can only set numeric values for DKP")
 			widget:SetText(-CheeseSLS.slsdatastore[widget.guiid].dkp)
 			widget:ClearFocus()
 			return nil
 		end
-		
+
 		newdkp = tonumber(newdkp)
-		if newdkp == nil then 
+		if newdkp == nil then
 			CheeseSLS:Print("Can only set numeric values for DKP")
 			widget:SetText(-CheeseSLS.slsdatastore[widget.guiid].dkp)
 			widget:ClearFocus()
 			return nil
 		end
-		
+
 		CheeseSLS.slsdatastore[widget.guiid].dkp = -newdkp
 		widget:ClearFocus()
 	end)
 	f:AddChild(edDKP)
-	
+
 	local buttonHalf = AceGUI:Create("Button")
 	buttonHalf.guiid = guiid
 	buttonHalf.edDKP = edDKP
@@ -84,7 +84,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 		slsdata.dkp = halfDKP
 	end)
 	f:AddChild(buttonHalf)
-		
+
 	local ddChar = AceGUI:Create("Dropdown")
 	ddChar.guiid = guiid
 	ddChar:SetList(raiderlist)
@@ -103,7 +103,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 		CheeseSLS.slsdatastore[widget.guiid].user = key
 	end)
 	f:AddChild(ddChar)
-	
+
 	local button1 = AceGUI:Create("Button")
 	button1.guiid = guiid
 	button1.slsframe = f
@@ -128,5 +128,5 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	end)
 	f:AddChild(button2)
 
-	return f	
+	return f
 end
