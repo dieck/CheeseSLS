@@ -3,10 +3,10 @@ local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
 function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	local AceGUI = LibStub("AceGUI-3.0")
 
-	if CheeseSLS.slsdatastore == nil then CheeseSLS.slsdatastore = {} end
+	if self.slsdatastore == nil then self.slsdatastore = {} end
 	local guiid = "itemlink" .. time()
 	local slsdata = { user=user, dkp=dkp, itemlink=itemlink }
-	CheeseSLS.slsdatastore[guiid] = slsdata
+	self.slsdatastore[guiid] = slsdata
 
 	local f = AceGUI:Create("Window")
 	f:SetTitle("CheeseSLS DKP charge")
