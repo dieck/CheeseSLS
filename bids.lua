@@ -400,8 +400,7 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 			self:sendWinningNotification(self.db.profile.currentbidding["lootTrackerId"], rtcmatch)
 		end
 		local raiders = self:GetRaiderList(self.db.profile.lastbidding.bids)
-		local f = self:createRequestDialogFrame(rtcmatch, -bidrounded, self.db.profile.lastbidding.itemLink, raiders)
-		f:Show()
+		self:createRequestDialogFrame(rtcmatch, -bidrounded, self.db.profile.lastbidding.itemLink, raiders)
 	end
 
 
