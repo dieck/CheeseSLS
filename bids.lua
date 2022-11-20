@@ -249,7 +249,7 @@ function CheeseSLS:BidTimerHandler()
 		else
 
 			-- find highest bidder(s)
-			local maxbid = -1
+			local maxbid = 0
 			local maxplayers = {}
 
 			-- negative bids: rolls
