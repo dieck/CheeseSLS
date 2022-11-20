@@ -3,10 +3,7 @@ local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
 function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	local AceGUI = LibStub("AceGUI-3.0")
 
-	if self.slsdatastore == nil then self.slsdatastore = {} end
-	local guiid = "itemlink" .. time()
-	local slsdata = { user=user, dkp=dkp, itemlink=itemlink }
-	self.slsdatastore[guiid] = slsdata
+	local frameId = "CheeseSLSRDFrame" .. tostring(time())
 
 	local f = AceGUI:Create("Window")
 	f:SetTitle("CheeseSLS DKP charge")
@@ -16,11 +13,18 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:SetHeight(165)
 	f:SetCallback("OnClose",function(widget) AceGUI:Release(widget) end)
 
+	_G[frameId] = f.frame
+	self.frames[frameId] = f
+	-- ESC not registered, we don't want to accidentally close
+
+	-- variables for usage in widget functions
+	f.paramUser = user
+	f.paramDKP = dkp
+	f.paramItemLink = itemlink
 
 	-- the item should be in cache now, was requested when bidding started
 	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemlink)
-	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice =
-	GetItemInfo(itemId)
+	local itemName, itemLink, itemRarity, itemLevel, itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture, itemSellPrice = GetItemInfo(itemId)
 
 	local lbIcon = AceGUI:Create("Icon")
 	lbIcon:SetRelativeWidth(0.3)
@@ -28,7 +32,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	lbIcon:SetImageSize(15,15)
 	lbIcon:SetCallback("OnEnter", function(widget)
 		GameTooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
-		GameTooltip:SetHyperlink(itemLink)
+		GameTooltip:SetHyperlink(widget.parent.paramItemLink)
 		GameTooltip:Show()
 	end)
 	lbIcon:SetCallback("OnLeave", function(widget)
@@ -37,8 +41,16 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:AddChild(lbIcon)
 
 	local lbText = AceGUI:Create("InteractiveLabel")
-	lbText:SetText(itemLink)
+	lbText:SetText(itemlink)
 	lbText:SetRelativeWidth(0.7)
+	lbText:SetCallback("OnEnter", function(widget)
+		GameTooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
+		GameTooltip:SetHyperlink(widget.parent.paramItemLink)
+		GameTooltip:Show()
+	end)
+	lbText:SetCallback("OnLeave", function(widget)
+		GameTooltip:Hide()
+	end)
 	f:AddChild(lbText)
 
 	local edDKP = AceGUI:Create("EditBox")
@@ -48,10 +60,11 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	edDKP:SetRelativeWidth(0.20)
 	edDKP:SetCallback("OnEnterPressed", function(widget)
 		local newdkp = widget:GetText()
+		local olddkp = tonumber(widget.parent.paramDKP)
 
 		if newdkp == nil then
 			CheeseSLS:Print("Can only set numeric values for DKP")
-			widget:SetText(-CheeseSLS.slsdatastore[widget.guiid].dkp)
+			widget:SetText(-olddkp)
 			widget:ClearFocus()
 			return nil
 		end
@@ -59,15 +72,16 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 		newdkp = tonumber(newdkp)
 		if newdkp == nil then
 			CheeseSLS:Print("Can only set numeric values for DKP")
-			widget:SetText(-CheeseSLS.slsdatastore[widget.guiid].dkp)
+			widget:SetText(-olddkp)
 			widget:ClearFocus()
 			return nil
 		end
 
-		CheeseSLS.slsdatastore[widget.guiid].dkp = -newdkp
+		widget.parent.paramDKP = -newdkp
 		widget:ClearFocus()
 	end)
 	f:AddChild(edDKP)
+	f.edDKP = edDKP
 
 	local buttonHalf = AceGUI:Create("Button")
 	buttonHalf.guiid = guiid
@@ -76,12 +90,11 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	buttonHalf:SetText("1/2")
 	buttonHalf:SetRelativeWidth(0.2)
 	buttonHalf:SetCallback("OnClick", function(widget)
-		local slsdata = CheeseSLS.slsdatastore[widget.guiid]
-		local curDKP = GoogleSheetDKP:GetDKP(slsdata.user)
+		local curDKP = GoogleSheetDKP:GetDKP(widget.parent.paramUser)
 		if curDKP == nil then curDKP = 0 end
 		local halfDKP = math.floor(curDKP / 2)
-		widget.edDKP:SetText(halfDKP)
-		slsdata.dkp = halfDKP
+		widget.parent.edDKP:SetText(halfDKP)
+		widget.parent.paramDKP = halfDKP
 	end)
 	f:AddChild(buttonHalf)
 
@@ -95,12 +108,12 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	ddChar:SetCallback("OnValueChanged", function(widget, event, key)
 		if key == nil then
 			CheeseSLS:Print("You need to choose a user")
-			widget:SetValue(CheeseSLS.slsdatastore[widget.guiid].user)
-			widget:SetText(CheeseSLS.slsdatastore[widget.guiid].user)
+			widget:SetValue(widget.parent.paramUser)
+			widget:SetText(widget.parent.paramUser)
 			widget:ClearFocus()
 			return nil
 		end
-		CheeseSLS.slsdatastore[widget.guiid].user = key
+		widget.parent.paramUser = key
 	end)
 	f:AddChild(ddChar)
 
@@ -110,9 +123,8 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	button1:SetText("Yes")
 	button1:SetRelativeWidth(0.5)
 	button1:SetCallback("OnClick", function(widget)
-		local slsdata = CheeseSLS.slsdatastore[widget.guiid]
-		GoogleSheetDKP:Item(slsdata.user, slsdata.dkp, slsdata.itemlink)
-		widget.slsframe:Hide()
+		GoogleSheetDKP:Item(widget.parent.paramUser, widget.parent.paramDKP, widget.parent.paramItemLink)
+		widget.parent:Hide()
 	end)
 	f:AddChild(button1)
 
@@ -122,9 +134,8 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	button2:SetText("No")
 	button2:SetRelativeWidth(0.5)
 	button2:SetCallback("OnClick", function(widget)
-		local slsdata = CheeseSLS.slsdatastore[widget.guiid]
-		CheeseSLS:Print("Will NOT book " .. slsdata.dkp .. "DKP to " .. slsdata.user .. " for " .. slsdata.itemlink .. ", so take care of that yourself, e.g. by /gsdkp item")
-		widget.slsframe:Hide()
+		CheeseSLS:Print("Will NOT book " .. tostring(widget.parent.paramDKP) .. "DKP to " .. widget.parent.paramUser .. " for " .. widget.parent.paramItemLink .. ", so take care of that yourself, e.g. by /gsdkp item")
+		widget.parent:Hide()
 	end)
 	f:AddChild(button2)
 

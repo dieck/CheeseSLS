@@ -270,46 +270,46 @@ CheeseSLS.optionsTable = {
 }
 
 function CheeseSLS:OnInitialize()
-  -- Code that you want to run when the addon is first loaded goes here.
-  self.db = LibStub("AceDB-3.0"):New("CheeseSLSDB", defaults)
+	-- Code that you want to run when the addon is first loaded goes here.
+	self.db = LibStub("AceDB-3.0"):New("CheeseSLSDB", defaults)
 
-  LibStub("AceConfig-3.0"):RegisterOptionsTable("CheeseSLS", self.optionsTable)
-  self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("CheeseSLS", "CheeseSLS")
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("CheeseSLS", self.optionsTable)
+	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("CheeseSLS", "CheeseSLS")
 
-  -- interaction from raid members
-  self:RegisterEvent("CHAT_MSG_WHISPER")
-  self:RegisterEvent("CHAT_MSG_PARTY")
-  self:RegisterEvent("CHAT_MSG_PARTY_LEADER")
-  self:RegisterEvent("CHAT_MSG_RAID")
-  self:RegisterEvent("CHAT_MSG_RAID_LEADER")
-  self:RegisterEvent("CHAT_MSG_RAID_WARNING")
-  self:RegisterEvent("CHAT_MSG_SYSTEM")
+	self.onetimes = {}
+	self.frames = {}
 
-  self:RegisterChatCommand("csls", "ChatCommand")
+	-- resetting possible old rolls
+	self.db.profile.currentbidding = {}
 
-  if self.db.profile.handle_bid then
-	self:RegisterChatCommand("bid", "ChatCommand");
-  end
-
-  if self.db.profile.handle_sls then
-	self:RegisterChatCommand("sls", "ChatCommand");
-  end
-
-  self.onetimes = {}
-
-  -- resetting possible old rolls
-  self.db.profile.currentbidding = {}
-
-
-  -- change default output language if configured
-  if self.outputLocales[self.db.profile.outputlanguage] ~= nil then
-	for k,v in pairs(self.outputLocales[self.db.profile.outputlanguage]) do L[k] = v end
-  end
+	-- change default output language if configured
+	if self.outputLocales[self.db.profile.outputlanguage] ~= nil then
+		for k,v in pairs(self.outputLocales[self.db.profile.outputlanguage]) do L[k] = v end
+	end
 
 end
 
 function CheeseSLS:OnEnable()
     -- Called when the addon is enabled
+
+	-- interaction from raid members
+	self:RegisterEvent("CHAT_MSG_WHISPER")
+	self:RegisterEvent("CHAT_MSG_PARTY")
+	self:RegisterEvent("CHAT_MSG_PARTY_LEADER")
+	self:RegisterEvent("CHAT_MSG_RAID")
+	self:RegisterEvent("CHAT_MSG_RAID_LEADER")
+	self:RegisterEvent("CHAT_MSG_RAID_WARNING")
+	self:RegisterEvent("CHAT_MSG_SYSTEM")
+
+	self:RegisterChatCommand("csls", "ChatCommand")
+
+	if self.db.profile.handle_bid then
+		self:RegisterChatCommand("bid", "ChatCommand");
+	end
+
+	if self.db.profile.handle_sls then
+		self:RegisterChatCommand("sls", "ChatCommand");
+	end
 end
 
 function CheeseSLS:OnDisable()
