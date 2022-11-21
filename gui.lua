@@ -18,9 +18,9 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	-- ESC not registered, we don't want to accidentally close
 
 	-- variables for usage in widget functions
-	f.paramUser = user
-	f.paramDKP = dkp
-	f.paramItemLink = itemlink
+	f:SetUserData("user", user)
+	f:SetUserData("dkp", dkp)
+	f:SetUserData("itemlink", itemlink)
 
 	-- the item should be in cache now, was requested when bidding started
 	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", itemlink)
@@ -32,7 +32,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	lbIcon:SetImageSize(15,15)
 	lbIcon:SetCallback("OnEnter", function(widget)
 		GameTooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
-		GameTooltip:SetHyperlink(widget.parent.paramItemLink)
+		GameTooltip:SetHyperlink(widget.parent:GetUserData("itemlink"))
 		GameTooltip:Show()
 	end)
 	lbIcon:SetCallback("OnLeave", function(widget)
@@ -45,7 +45,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	lbText:SetRelativeWidth(0.7)
 	lbText:SetCallback("OnEnter", function(widget)
 		GameTooltip:SetOwner(widget.frame, "ANCHOR_TOPRIGHT")
-		GameTooltip:SetHyperlink(widget.parent.paramItemLink)
+		GameTooltip:SetHyperlink(widget.parent:GetUserData("itemlink"))
 		GameTooltip:Show()
 	end)
 	lbText:SetCallback("OnLeave", function(widget)
@@ -60,7 +60,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	edDKP:SetRelativeWidth(0.20)
 	edDKP:SetCallback("OnEnterPressed", function(widget)
 		local newdkp = widget:GetText()
-		local olddkp = tonumber(widget.parent.paramDKP)
+		local olddkp = tonumber(widget.parent:GetUserData("dkp"))
 
 		if newdkp == nil then
 			CheeseSLS:Print("Can only set numeric values for DKP")
@@ -77,7 +77,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 			return nil
 		end
 
-		widget.parent.paramDKP = -newdkp
+		widget.parent:SetUserData("dkp", -newdkp)
 		widget:ClearFocus()
 	end)
 	f:AddChild(edDKP)
@@ -90,11 +90,11 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	buttonHalf:SetText("1/2")
 	buttonHalf:SetRelativeWidth(0.2)
 	buttonHalf:SetCallback("OnClick", function(widget)
-		local curDKP = GoogleSheetDKP:GetDKP(widget.parent.paramUser)
+		local curDKP = GoogleSheetDKP:GetDKP(widget.parent:GetUserData("user"))
 		if curDKP == nil then curDKP = 0 end
 		local halfDKP = math.floor(curDKP / 2)
 		widget.parent.edDKP:SetText(halfDKP)
-		widget.parent.paramDKP = halfDKP
+		widget.parent:SetUserData("dkp", halfDKP)
 	end)
 	f:AddChild(buttonHalf)
 
@@ -108,12 +108,12 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	ddChar:SetCallback("OnValueChanged", function(widget, event, key)
 		if key == nil then
 			CheeseSLS:Print("You need to choose a user")
-			widget:SetValue(widget.parent.paramUser)
-			widget:SetText(widget.parent.paramUser)
+			widget:SetValue(widget.parent:GetUserData("user"))
+			widget:SetText(widget.parent:GetUserData("user"))
 			widget:ClearFocus()
 			return nil
 		end
-		widget.parent.paramUser = key
+		widget.parent:SetUserData("user", key)
 	end)
 	f:AddChild(ddChar)
 
@@ -123,7 +123,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	button1:SetText("Yes")
 	button1:SetRelativeWidth(0.5)
 	button1:SetCallback("OnClick", function(widget)
-		GoogleSheetDKP:Item(widget.parent.paramUser, widget.parent.paramDKP, widget.parent.paramItemLink)
+		GoogleSheetDKP:Item(widget.parent:GetUserData("user"), widget.parent:GetUserData("dkp"), widget.parent:GetUserData("itemlink"))
 		widget.parent:Hide()
 	end)
 	f:AddChild(button1)
@@ -134,7 +134,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	button2:SetText("No")
 	button2:SetRelativeWidth(0.5)
 	button2:SetCallback("OnClick", function(widget)
-		CheeseSLS:Print("Will NOT book " .. tostring(widget.parent.paramDKP) .. "DKP to " .. widget.parent.paramUser .. " for " .. widget.parent.paramItemLink .. ", so take care of that yourself, e.g. by /gsdkp item")
+		CheeseSLS:Print("Will NOT book " .. tostring(widget.parent:GetUserData("dkp")) .. "DKP to " .. widget.parent:GetUserData("user") .. " for " .. widget.parent:GetUserData("itemlink") .. ", so take care of that yourself, e.g. by /gsdkp item")
 		widget.parent:Hide()
 	end)
 	f:AddChild(button2)
