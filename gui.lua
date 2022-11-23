@@ -54,7 +54,6 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:AddChild(lbText)
 
 	local edDKP = AceGUI:Create("EditBox")
-	edDKP.guiid = guiid
 	edDKP:SetText(-dkp)
 	edDKP:SetLabel("DKP charge")
 	edDKP:SetRelativeWidth(0.20)
@@ -84,7 +83,6 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f.edDKP = edDKP
 
 	local buttonHalf = AceGUI:Create("Button")
-	buttonHalf.guiid = guiid
 	buttonHalf.edDKP = edDKP
 	buttonHalf.slsframe = f
 	buttonHalf:SetText("1/2")
@@ -99,7 +97,6 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:AddChild(buttonHalf)
 
 	local ddChar = AceGUI:Create("Dropdown")
-	ddChar.guiid = guiid
 	ddChar:SetList(raiderlist)
 	ddChar:SetValue(user)
 	ddChar:SetText(raiderlist[user])
@@ -118,7 +115,6 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:AddChild(ddChar)
 
 	local button1 = AceGUI:Create("Button")
-	button1.guiid = guiid
 	button1.slsframe = f
 	button1:SetText("Yes")
 	button1:SetRelativeWidth(0.5)
@@ -129,7 +125,6 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:AddChild(button1)
 
 	local button2 = AceGUI:Create("Button")
-	button2.guiid = guiid
 	button2.slsframe = f
 	button2:SetText("No")
 	button2:SetRelativeWidth(0.5)
