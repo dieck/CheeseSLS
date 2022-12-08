@@ -271,20 +271,20 @@ CheeseSLS.optionsTable = {
 
 function CheeseSLS:OnInitialize()
 	-- Code that you want to run when the addon is first loaded goes here.
-	self.db = LibStub("AceDB-3.0"):New("CheeseSLSDB", defaults)
+	CheeseSLS.db = LibStub("AceDB-3.0"):New("CheeseSLSDB", defaults)
 
-	LibStub("AceConfig-3.0"):RegisterOptionsTable("CheeseSLS", self.optionsTable)
-	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("CheeseSLS", "CheeseSLS")
+	LibStub("AceConfig-3.0"):RegisterOptionsTable("CheeseSLS", CheeseSLS.optionsTable)
+	CheeseSLS.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("CheeseSLS", "CheeseSLS")
 
-	self.onetimes = {}
-	self.frames = {}
+	CheeseSLS.onetimes = {}
+	CheeseSLS.frames = {}
 
 	-- resetting possible old rolls
-	self.db.profile.currentbidding = {}
+	CheeseSLS.db.profile.currentbidding = {}
 
 	-- change default output language if configured
-	if self.outputLocales[self.db.profile.outputlanguage] ~= nil then
-		for k,v in pairs(self.outputLocales[self.db.profile.outputlanguage]) do L[k] = v end
+	if CheeseSLS.outputLocales[CheeseSLS.db.profile.outputlanguage] ~= nil then
+		for k,v in pairs(CheeseSLS.outputLocales[CheeseSLS.db.profile.outputlanguage]) do L[k] = v end
 	end
 
 end
@@ -293,22 +293,22 @@ function CheeseSLS:OnEnable()
     -- Called when the addon is enabled
 
 	-- interaction from raid members
-	self:RegisterEvent("CHAT_MSG_WHISPER")
-	self:RegisterEvent("CHAT_MSG_PARTY")
-	self:RegisterEvent("CHAT_MSG_PARTY_LEADER")
-	self:RegisterEvent("CHAT_MSG_RAID")
-	self:RegisterEvent("CHAT_MSG_RAID_LEADER")
-	self:RegisterEvent("CHAT_MSG_RAID_WARNING")
-	self:RegisterEvent("CHAT_MSG_SYSTEM")
+	CheeseSLS:RegisterEvent("CHAT_MSG_WHISPER")
+	CheeseSLS:RegisterEvent("CHAT_MSG_PARTY")
+	CheeseSLS:RegisterEvent("CHAT_MSG_PARTY_LEADER")
+	CheeseSLS:RegisterEvent("CHAT_MSG_RAID")
+	CheeseSLS:RegisterEvent("CHAT_MSG_RAID_LEADER")
+	CheeseSLS:RegisterEvent("CHAT_MSG_RAID_WARNING")
+	CheeseSLS:RegisterEvent("CHAT_MSG_SYSTEM")
 
-	self:RegisterChatCommand("csls", "ChatCommand")
+	CheeseSLS:RegisterChatCommand("csls", "ChatCommand")
 
-	if self.db.profile.handle_bid then
-		self:RegisterChatCommand("bid", "ChatCommand");
+	if CheeseSLS.db.profile.handle_bid then
+		CheeseSLS:RegisterChatCommand("bid", "ChatCommand");
 	end
 
-	if self.db.profile.handle_sls then
-		self:RegisterChatCommand("sls", "ChatCommand");
+	if CheeseSLS.db.profile.handle_sls then
+		CheeseSLS:RegisterChatCommand("sls", "ChatCommand");
 	end
 end
 
@@ -323,8 +323,8 @@ end
 function CheeseSLS:ChatCommand(inc)
 
 	if strlt(inc) == "" then
-		self:Print(L["Usage: |cFF00CCFF/csls |cFFA335EE[Sword of a Thousand Truths]|r to start a bid"])
-		self:Print(L["Usage: |cFF00CCFF/csls config|r to open the configuration window"])
+		CheeseSLS:Print(L["Usage: |cFF00CCFF/csls |cFFA335EE[Sword of a Thousand Truths]|r to start a bid"])
+		CheeseSLS:Print(L["Usage: |cFF00CCFF/csls config|r to open the configuration window"])
 		return nil
 	end
 
@@ -334,22 +334,22 @@ function CheeseSLS:ChatCommand(inc)
 	end
 
 	if strlt(inc) == "rules" then
-		self:OutputRules()
+		CheeseSLS:OutputRules()
 		return nil
 	end
 
 	if strlt(inc) == "current" or strlt(inc) == "bids" or strlt(inc) == "list" then
-		self:OutputFullList(self.db.profile.currentbidding.bids)
+		CheeseSLS:OutputFullList(CheeseSLS.db.profile.currentbidding.bids)
 		return nil
 	end
 
 	if strlt(inc) == "second" or strlt(inc) == "again" then
-		self:SecondBidder()
+		CheeseSLS:SecondBidder()
 		return nil
 	end
 
 	if strlt(inc) == "last" then
-		self:OutputFullList(self.db.profile.lastbidding.bids)
+		CheeseSLS:OutputFullList(CheeseSLS.db.profile.lastbidding.bids)
 		return nil
 	end
 
@@ -367,37 +367,37 @@ function CheeseSLS:ChatCommand(inc)
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(user))
 		if currentDKP == nil then currentDKP = 0 end
 		local halfDKP = math.floor(currentDKP/2)
-		local raiders = self:GetRaiderList(self.db.profile.currentbidding.bids)
-		self:createRequestDialogFrame(user, -halfDKP, item, raiders)
+		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
+		CheeseSLS:createRequestDialogFrame(user, -halfDKP, item, raiders)
 		return true
 	end
 
 	if (strlt(cmd) == "f") and (user) and (item) then
 		local currentDKP = tonumber(GoogleSheetDKP:GetDKP(user))
 		if currentDKP == nil then currentDKP = 0 end
-		local bidfix = tonumber(self.db.profile.fixcosts)
+		local bidfix = tonumber(CheeseSLS.db.profile.fixcosts)
 		if currentDKP < bidfix then
 			bidfix = currentDKP
 			local msg = user .. " does not have enough DKP for Fix Bid. I will bid all remaining DKP."
-			self:Print(msg)
+			CheeseSLS:Print(msg)
 		end
-		local raiders = self:GetRaiderList(self.db.profile.currentbidding.bids)
-		self:createRequestDialogFrame(user, -bidfix, item, raiders)
+		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
+		CheeseSLS:createRequestDialogFrame(user, -bidfix, item, raiders)
 		return true
 	end
 
 	-- if inc is itemLink: start bidding
 	local d, itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId, linkLevel, specializationID, reforgeId, unknown1, unknown2 = strsplit(":", inc)
 	if itemId then
-		self:StartBidding(inc)
+		CheeseSLS:StartBidding(inc)
 		return nil
 	end
 
 end
 
 function CheeseSLS:Debug(t)
-	if (self.db.profile.debug) then
-		self:Print("CheeseSLS DEBUG: " .. t)
+	if (CheeseSLS.db.profile.debug) then
+		CheeseSLS:Print("CheeseSLS DEBUG: " .. t)
 	end
 end
 

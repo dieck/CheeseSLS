@@ -14,7 +14,7 @@ function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
 	f:SetCallback("OnClose",function(widget) AceGUI:Release(widget) end)
 
 	_G[frameId] = f.frame
-	self.frames[frameId] = f
+	CheeseSLS.frames[frameId] = f
 	-- ESC not registered, we don't want to accidentally close
 
 	-- variables for usage in widget functions
