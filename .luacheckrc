@@ -35,6 +35,7 @@ globals = {
 
 	-- CheeseSLS
 	"CheeseSLS",
+	"CheeseSLSLootTracker",
 	"RollTrackerClassic_Addon",
 	"GoogleSheetDKP",
 	

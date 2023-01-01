@@ -134,7 +134,7 @@ function CheeseSLS:StartBidding(itemLink, holdingPlayer, lootTrackerId)
 		if UnitInParty("player") then
 			SendChatMessage(startnotice, "PARTY")
 		else
-			CheeseSLS:Print(L["You are not in a party or raid. So here we go: Have fun bidding for itemLink against yourCheeseSLS."](itemLink))
+			CheeseSLS:Print(L["You are not in a party or raid. So here we go: Have fun bidding for itemLink against yourself."](itemLink))
 		end
 	end
 
@@ -288,7 +288,7 @@ function CheeseSLS:BidTimerHandler()
 						SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, name)
 					end
 					if CheeseSLS.db.profile.currentbidding["lootTrackerId"] then
-						CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], name)
+						CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], name, newmaxrounded)
 					end
 					CheeseSLS:createRequestDialogFrame(name, -newmaxrounded, CheeseSLS.db.profile.currentbidding.itemLink, raiders)
 CheeseSLS:Debug("BidTimerHandler maxplayers1 createRequestDialogFrame")
@@ -310,7 +310,7 @@ CheeseSLS:Debug("BidTimerHandler maxplayers1 createRequestDialogFrame")
 						SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, name)
 					end
 					if CheeseSLS.db.profile.currentbidding["lootTrackerId"] then
-						CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], name)
+						CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], name, 0)
 					end
 					local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.currentbidding.bids)
 					-- requesting storing 0 DKP bid
@@ -397,7 +397,7 @@ function CheeseSLS:IncomingChat(text, sender, orig)
 			SendChatMessage(L["Please collect your item from"](CheeseSLS.db.profile.currentbidding["holdingPlayer"]), "WHISPER", nil, rtcmatch)
 		end
 		if CheeseSLS.db.profile.currentbidding["lootTrackerId"] then
-			CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], rtcmatch)
+			CheeseSLS:sendWinningNotification(CheeseSLS.db.profile.currentbidding["lootTrackerId"], rtcmatch, bidrounded)
 		end
 		local raiders = CheeseSLS:GetRaiderList(CheeseSLS.db.profile.lastbidding.bids)
 		CheeseSLS:createRequestDialogFrame(rtcmatch, -bidrounded, CheeseSLS.db.profile.lastbidding.itemLink, raiders)

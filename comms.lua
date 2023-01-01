@@ -31,8 +31,8 @@ function CheeseSLS:sendReceivedBid(bidtype)
 	CheeseSLS:SendCommMessage(CheeseSLS.commPrefix, CheeseSLS:Serialize(commmsg), CheeseSLS.SENDTO, nil, "NORMAL")
 end
 
-function CheeseSLS:sendWinningNotification(lootTrackerId, winner)
-	local commmsg = { command = "WINNING_NOTIFICATION", version = CheeseSLS.commVersion, lootTrackerId = lootTrackerId, winner = winner }
+function CheeseSLS:sendWinningNotification(lootTrackerId, winner, winnerdkp)
+	local commmsg = { command = "WINNING_NOTIFICATION", version = CheeseSLS.commVersion, lootTrackerId = lootTrackerId, winner = winner, winnerdkp = winnerdkp }
 	if CheeseSLSLootTracker then
 		if CheeseSLSLootTracker.db.profile.loothistory[lootTrackerId] then
 			commmsg["loothistory"] = CheeseSLSLootTracker.db.profile.loothistory[lootTrackerId]

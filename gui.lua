@@ -1,7 +1,12 @@
 local L = LibStub("AceLocale-3.0"):GetLocale("CheeseSLS", true)
 
-function CheeseSLS:createRequestDialogFrame(user, dkp, itemlink, raiderlist)
+function CheeseSLS:createRequestDialogFrame(user, biddkp, itemlink, raiderlst)
 	local AceGUI = LibStub("AceGUI-3.0")
+
+	-- get raiderlist if not given
+	local raiderlist = raiderlst or CheeseSLS:GetRaiderList()
+	local dkp = biddkp or 0
+	dkp = tonumber(dkp)
 
 	local frameId = "CheeseSLSRDFrame" .. tostring(time())
 
