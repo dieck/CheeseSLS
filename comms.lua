@@ -33,6 +33,11 @@ end
 
 function CheeseSLS:sendWinningNotification(lootTrackerId, winner)
 	local commmsg = { command = "WINNING_NOTIFICATION", version = CheeseSLS.commVersion, lootTrackerId = lootTrackerId, winner = winner }
+	if CheeseSLSLootTracker then
+		if CheeseSLSLootTracker.db.profile.loothistory[lootTrackerId] then
+			commmsg["loothistory"] = CheeseSLSLootTracker.db.profile.loothistory[lootTrackerId]
+		end
+	end
 	CheeseSLS:SendCommMessage(CheeseSLS.commPrefix, CheeseSLS:Serialize(commmsg), CheeseSLS.SENDTO, nil, "NORMAL")
 end
 
